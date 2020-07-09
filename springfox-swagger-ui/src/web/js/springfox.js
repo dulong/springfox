@@ -4,6 +4,7 @@ window.onload = () => {
 
   const buildSystemAsync = async (baseUrl) => {
     try {
+      console.log(baseUrl);
       const configUIResponse = await fetch(
           baseUrl + "/swagger-resources/configuration/ui",
           {
@@ -36,13 +37,9 @@ window.onload = () => {
             },
           });
       const resources = await resourcesResponse.json();
-      resources.forEach(resource => {
-        if (resource.url.substring(0, 4) !== 'http') {
-          resource.url = baseUrl + resource.url;
-        }
-      });
-
-      window.ui = getUI(baseUrl, resources, configUI, configSecurity);
+      window.ui = getUI(baseUrl, prependBaseUrl(baseUrl.replace(configUI.swaggerBaseUiUrl, ""), resources), configUI, configSecurity);
+      window.uiConfig = configUI;
+      window.securityConfig = configSecurity;
     } catch (e) {
       const retryURL = await prompt(
         "Unable to infer base url. This is common when using dynamic servlet registration or when" +
@@ -53,6 +50,13 @@ window.onload = () => {
 
       return buildSystemAsync(retryURL);
     }
+  };
+
+  const prependBaseUrl = (baseUrl, resources) => {
+    resources.forEach(function(r) {
+      r.url = baseUrl + r.url;
+    })
+    return resources;
   };
 
   const getUI = (baseUrl, resources, configUI, configSecurity) => {
@@ -96,7 +100,7 @@ window.onload = () => {
       /*--------------------------------------------*\
        * Network
       \*--------------------------------------------*/
-      oauth2RedirectUrl: baseUrl + "/webjars/springfox-swagger-ui/oauth2-redirect.html",
+      oauth2RedirectUrl: baseUrl + "/swagger-ui/oauth2-redirect.html",
       requestInterceptor: (a => a),
       responseInterceptor: (a => a),
       showMutatedRequest: true,
@@ -132,15 +136,17 @@ window.onload = () => {
   };
 
   const getBaseURL = () => {
-    const urlMatches = /(.*)\/swagger-ui.html.*/.exec(window.location.href);
+    const urlMatches = /(.*)\/swagger-ui(\/index.html.*)*/.exec(window.location.href);
     return urlMatches[1];
   };
 
   /* Entry Point */
   (async () => {
-    await buildSystemAsync(getBaseURL());
+    const baseURL = getBaseURL();
+    await buildSystemAsync(baseURL);
+    const springBaseUrl = baseURL.replace(window.uiConfig.swaggerBaseUiUrl, "");
     if (window.ui.getConfigs().custom.enableCsrfSupport) {
-      await csrfSupport(getBaseURL());
+      await csrfSupport(springBaseUrl);
     }
   })();
 

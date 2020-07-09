@@ -58,6 +58,7 @@ public class OperationResponseClassReader implements OperationBuilderPlugin {
     this.pluginsManager = pluginsManager;
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public void apply(OperationContext context) {
     ResolvedType returnType = context.getReturnType();
@@ -68,7 +69,7 @@ public class OperationResponseClassReader implements OperationBuilderPlugin {
 
     ModelContext modelContext = context.operationModelsBuilder().addReturn(
         returnType,
-        viewProvider.viewFor(returnType, context));
+        viewProvider.viewFor(context));
 
     Map<String, String> knownNames;
     knownNames = new HashMap<>();

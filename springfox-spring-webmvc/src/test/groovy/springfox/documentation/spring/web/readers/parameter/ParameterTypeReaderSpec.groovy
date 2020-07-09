@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.multipart.MultipartFile
 import spock.lang.Unroll
-import springfox.documentation.builders.ParameterBuilder
 import springfox.documentation.service.ResolvedMethodParameter
 import springfox.documentation.spi.DocumentationType
 import springfox.documentation.spi.schema.GenericTypeNamingStrategy
@@ -40,23 +39,32 @@ import springfox.documentation.spring.web.dummy.models.Example
 import springfox.documentation.spring.web.mixins.RequestMappingSupport
 import springfox.documentation.spring.web.plugins.DocumentationContextSpec
 
+import javax.validation.constraints.NotNull
+
 import static org.springframework.http.MediaType.*
 
-@Mixin([RequestMappingSupport])
-class ParameterTypeReaderSpec extends DocumentationContextSpec {
+class ParameterTypeReaderSpec extends DocumentationContextSpec implements RequestMappingSupport {
 
   @Unroll
   def "param #type"() {
     given:
     def paramAnnotations = annotations == null ? [] : annotations
-    def resolvedMethodParameter = new ResolvedMethodParameter(0, "", paramAnnotations, resolve(type))
+    def resolvedMethodParameter = new ResolvedMethodParameter(
+        0,
+        "",
+        paramAnnotations,
+        resolve(type))
     def operationContext = Mock(OperationContext)
 
     and:
     operationContext.consumes() >> consumes
     operationContext.httpMethod() >> httpMethod
-    ParameterContext parameterContext = new ParameterContext(resolvedMethodParameter, new ParameterBuilder(),
-        documentationContext(), Mock(GenericTypeNamingStrategy), operationContext)
+    ParameterContext parameterContext =
+        new ParameterContext(
+            resolvedMethodParameter,
+            documentationContext(),
+            Mock(GenericTypeNamingStrategy),
+            operationContext, 0)
 
     when:
     def operationCommand = new ParameterTypeReader()
@@ -64,26 +72,33 @@ class ParameterTypeReaderSpec extends DocumentationContextSpec {
 
     then:
     parameterContext.parameterBuilder().build().paramType == expected
+    parameterContext.requestParameterBuilder()
+        .name("test")
+        .build().in.in == expected
 
     where:
-    annotations                               | type            | consumes                      | httpMethod      | expected
-    [[:] as PathVariable]                     | Integer         | []                            | HttpMethod.GET  | "path"
-    [[:] as ModelAttribute]                   | Integer         | []                            | HttpMethod.GET  | "body"
-    [[:] as ModelAttribute]                   | Example         | []                            | HttpMethod.GET  | "body"
-    [[:] as RequestHeader]                    | Integer         | []                            | HttpMethod.GET  | "header"
-    [[:] as RequestParam]                     | Integer         | []                            | HttpMethod.GET  | "query"
-    [[:] as RequestParam]                     | Integer         | []                            | HttpMethod.POST | "query"
-    [[:] as RequestParam]                     | Integer         | [APPLICATION_JSON]            | HttpMethod.GET  | "query"
-    [[:] as RequestParam]                     | Integer         | [APPLICATION_JSON]            | HttpMethod.POST | "query"
-    [[:] as RequestParam]                     | Integer         | [APPLICATION_FORM_URLENCODED] | HttpMethod.POST | "form"
-    [[:] as RequestPart, [:] as RequestParam] | Integer         | [MULTIPART_FORM_DATA]         | HttpMethod.POST | "formData"
-    [[:] as RequestPart]                      | Example         | [MULTIPART_FORM_DATA]         | HttpMethod.POST | "formData"
-    [[:] as RequestBody]                      | Integer         | [APPLICATION_JSON]            | HttpMethod.POST | "body"
-    null                                      | Integer         | []                            | HttpMethod.GET  | "query"
-    [[:] as RequestPart]                      | MultipartFile   | []                            | HttpMethod.GET  | "form"
-    null                                      | MultipartFile   | []                            | HttpMethod.GET  | "form"
-    null                                      | MultipartFile[] | []                            | HttpMethod.GET  | "form"
-    null                                      | Example         | []                            | HttpMethod.GET  | "query"
+    annotations                               | type            | consumes                      | httpMethod         | expected
+    [[:] as PathVariable]                     | Integer         | []                            | HttpMethod.GET     | "path"
+    [[:] as ModelAttribute]                   | Integer         | []                            | HttpMethod.GET     | "query"
+    [[:] as ModelAttribute]                   | Example         | []                            | HttpMethod.GET     | "query"
+    [[:] as RequestHeader]                    | Integer         | []                            | HttpMethod.GET     | "header"
+    [[:] as RequestParam]                     | Integer         | []                            | HttpMethod.GET     | "query"
+    [[:] as RequestParam]                     | Integer         | []                            | HttpMethod.POST    | "query"
+    [[:] as RequestParam]                     | Integer         | [APPLICATION_JSON]            | HttpMethod.GET     | "query"
+    [[:] as RequestParam]                     | Integer         | [APPLICATION_JSON]            | HttpMethod.POST    | "query"
+    [[:] as RequestParam]                     | Integer         | [APPLICATION_FORM_URLENCODED] | HttpMethod.POST    | "form"
+    [[:] as RequestPart, [:] as RequestParam] | Integer         | [MULTIPART_FORM_DATA]         | HttpMethod.POST    | "formData"
+    [[:] as RequestPart]                      | Example         | [MULTIPART_FORM_DATA]         | HttpMethod.POST    | "formData"
+    [[:] as RequestBody]                      | Integer         | [APPLICATION_JSON]            | HttpMethod.POST    | "body"
+    null                                      | Integer         | []                            | HttpMethod.GET     | "query"
+    [[:] as RequestPart]                      | MultipartFile   | []                            | HttpMethod.GET     | "formData"
+    null                                      | MultipartFile   | []                            | HttpMethod.GET     | "body"
+    null                                      | MultipartFile[] | []                            | HttpMethod.GET     | "body"
+    null                                      | Integer         | []                            | HttpMethod.GET     | "query"
+    [[:] as NotNull]                          | String          | []                            | HttpMethod.GET     | "query"
+    [[:] as NotNull]                          | String          | []                            | HttpMethod.HEAD    | "query"
+    [[:] as NotNull]                          | String          | []                            | HttpMethod.OPTIONS | "query"
+    [[:] as NotNull]                          | String          | []                            | HttpMethod.POST    | "body"
   }
 
   def "Should work with any documentationType"() {

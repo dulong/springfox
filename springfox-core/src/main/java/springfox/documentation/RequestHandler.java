@@ -59,9 +59,9 @@ public interface RequestHandler extends Comparable<RequestHandler> {
 
   Set<RequestMethod> supportedMethods();
 
-  Set<? extends MediaType> produces();
+  Set<MediaType> produces();
 
-  Set<? extends MediaType> consumes();
+  Set<MediaType> consumes();
 
   Set<NameValueExpression<String>> headers();
 
@@ -82,7 +82,7 @@ public interface RequestHandler extends Comparable<RequestHandler> {
    * @deprecated This is introduced to preserve backwards compat
    */
   @Deprecated
-  RequestMappingInfo getRequestMapping();
+  RequestMappingInfo<?> getRequestMapping();
 
   /**
    * @return handler method
@@ -108,6 +108,7 @@ public interface RequestHandler extends Comparable<RequestHandler> {
         .compare(this, other);
   }
 
+  @SuppressWarnings({"rawtypes", "unchecked"})
   static String sortedPaths(PatternsRequestCondition patternsCondition) {
     TreeSet<String> paths = new TreeSet<>(patternsCondition.getPatterns());
     return paths.stream()

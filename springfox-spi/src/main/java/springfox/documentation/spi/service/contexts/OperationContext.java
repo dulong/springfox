@@ -24,10 +24,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMethod;
 import springfox.documentation.builders.OperationBuilder;
-import springfox.documentation.schema.Model;
-import springfox.documentation.service.Parameter;
+import springfox.documentation.service.RequestParameter;
 import springfox.documentation.service.ResolvedMethodParameter;
-import springfox.documentation.service.ResponseMessage;
+import springfox.documentation.service.Response;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.schema.AlternateTypeProvider;
 import springfox.documentation.spi.schema.GenericTypeNamingStrategy;
@@ -35,6 +34,7 @@ import springfox.documentation.spring.wrapper.NameValueExpression;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +74,8 @@ public class OperationContext {
     return operationIndex;
   }
 
-  public List<ResponseMessage> getGlobalResponseMessages(String forHttpMethod) {
+  @SuppressWarnings("deprecation")
+  public List<springfox.documentation.service.ResponseMessage> getGlobalResponseMessages(String forHttpMethod) {
     DocumentationContext documentationContext = getDocumentationContext();
     if (documentationContext.getGlobalResponseMessages()
         .containsKey(RequestMethod.valueOf(forHttpMethod))) {
@@ -84,8 +85,19 @@ public class OperationContext {
     return new ArrayList<>();
   }
 
-  public List<Parameter> getGlobalOperationParameters() {
+  /**
+   * Use {@link OperationContext#getGlobalRequestParameters()} instead
+   *
+   * @return List
+   * @deprecated @since 3.0
+   */
+  @Deprecated
+  public List<springfox.documentation.service.Parameter> getGlobalOperationParameters() {
     return nullToEmptyList(getDocumentationContext().getGlobalRequestParameters());
+  }
+
+  public List<RequestParameter> getGlobalRequestParameters() {
+    return nullToEmptyList(getDocumentationContext().getGlobalParameters());
   }
 
   public List<SecurityContext> securityContext() {
@@ -95,7 +107,7 @@ public class OperationContext {
   }
 
   private Predicate<SecurityContext> pathMatches() {
-    return input -> input.securityForOperation(OperationContext.this) != null;
+    return input -> !input.securityForOperation(OperationContext.this).isEmpty();
   }
 
   public String requestMappingPattern() {
@@ -110,7 +122,8 @@ public class OperationContext {
     return requestContext.operationModelsBuilder();
   }
 
-  public Map<String, Set<Model>> getKnownModels() {
+  @SuppressWarnings("deprecation")
+  public Map<String, Set<springfox.documentation.schema.Model>> getKnownModels() {
     return requestContext.getModelMap();
   }
 
@@ -126,14 +139,15 @@ public class OperationContext {
     return getAlternateTypeProvider().alternateFor(resolved);
   }
 
-  public Set<? extends MediaType> produces() {
+  public Set<MediaType> produces() {
     return requestContext.produces();
   }
 
-  public Set<? extends MediaType> consumes() {
+  public Set<MediaType> consumes() {
     return requestContext.consumes();
   }
 
+  @SuppressWarnings("rawtypes")
   public Set<Class> getIgnorableParameterTypes() {
     return getDocumentationContext().getIgnorableParameterTypes().stream().collect(collectingAndThen(
         toSet(),
@@ -179,5 +193,9 @@ public class OperationContext {
 
   public <T extends Annotation> List<T> findAllAnnotations(Class<T> annotation) {
     return requestContext.findAnnotations(annotation);
+  }
+
+  public Collection<Response> globalResponsesFor(HttpMethod httpMethod) {
+    return getDocumentationContext().globalResponsesFor(httpMethod);
   }
 }

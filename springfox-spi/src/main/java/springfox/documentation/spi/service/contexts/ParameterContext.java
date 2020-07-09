@@ -20,7 +20,7 @@ package springfox.documentation.spi.service.contexts;
 
 import com.fasterxml.classmate.ResolvedType;
 import org.springframework.core.MethodParameter;
-import springfox.documentation.builders.ParameterBuilder;
+import springfox.documentation.builders.RequestParameterBuilder;
 import springfox.documentation.service.ResolvedMethodParameter;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.schema.AlternateTypeProvider;
@@ -28,21 +28,28 @@ import springfox.documentation.spi.schema.GenericTypeNamingStrategy;
 
 import java.util.Set;
 
+import static springfox.documentation.builders.BuilderDefaults.*;
+
 public class ParameterContext {
-  private final ParameterBuilder parameterBuilder;
+  @SuppressWarnings("deprecation")
+  private final springfox.documentation.builders.ParameterBuilder parameterBuilder;
   private final ResolvedMethodParameter resolvedMethodParameter;
   private final DocumentationContext documentationContext;
   private final GenericTypeNamingStrategy genericNamingStrategy;
   private final OperationContext operationContext;
+  private final RequestParameterBuilder requestParameterBuilder;
 
+  @SuppressWarnings("deprecation")
   public ParameterContext(
       ResolvedMethodParameter resolvedMethodParameter,
-      ParameterBuilder parameterBuilder,
       DocumentationContext documentationContext,
       GenericTypeNamingStrategy genericNamingStrategy,
-      OperationContext operationContext) {
-
-    this.parameterBuilder = parameterBuilder;
+      OperationContext operationContext,
+      int parameterIndex) {
+    this.parameterBuilder = new springfox.documentation.builders.ParameterBuilder();
+    this.requestParameterBuilder = new RequestParameterBuilder()
+        .accepts(nullToEmptyList(operationContext.consumes()))
+        .parameterIndex(parameterIndex);
     this.resolvedMethodParameter = resolvedMethodParameter;
     this.documentationContext = documentationContext;
     this.genericNamingStrategy = genericNamingStrategy;
@@ -63,8 +70,18 @@ public class ParameterContext {
     throw new UnsupportedOperationException("Please use resolvedMethodParameter instead");
   }
 
-  public ParameterBuilder parameterBuilder() {
+  /**
+   * @return this
+   * @since 3.0.0 this has been deprecated in favor of @see
+   * @deprecated
+   */
+  @Deprecated
+  public springfox.documentation.builders.ParameterBuilder parameterBuilder() {
     return parameterBuilder;
+  }
+
+  public RequestParameterBuilder requestParameterBuilder() {
+    return requestParameterBuilder;
   }
 
   public DocumentationContext getDocumentationContext() {

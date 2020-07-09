@@ -28,8 +28,10 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import spock.lang.Specification
 import springfox.documentation.builders.DocumentationBuilder
 import springfox.documentation.service.ApiInfo
-import springfox.documentation.service.ResourceListing
+import springfox.documentation.spi.DocumentationType
 import springfox.documentation.spring.web.DocumentationCache
+import springfox.documentation.spring.web.plugins.Docket
+import springfox.documentation.spring.web.plugins.DocumentationPluginsManager
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
@@ -47,9 +49,6 @@ class ApiResourceControllerSpec extends Specification {
     "enableCsrfSupport": true
 }"""
   def ui = """{
-    "apisSorter":"alpha",
-    "jsonEditor":false,
-    "showRequestHeaders":false, 
     "deepLinking": true,
     "displayOperationId": false,
     "defaultModelsExpandDepth": 1,
@@ -84,7 +83,7 @@ class ApiResourceControllerSpec extends Specification {
   def sut
 
   def setup() {
-    sut = new ApiResourceController(inMemorySwaggerResources())
+    sut = new ApiResourceController(inMemorySwaggerResources(), "/")
     sut.with {
       securityConfiguration = SecurityConfigurationBuilder.builder()
           .clientId("client")
@@ -118,7 +117,12 @@ class ApiResourceControllerSpec extends Specification {
   }
 
   def inMemorySwaggerResources() {
-    def resources = new InMemorySwaggerResourcesProvider(mockEnvironment(), documentationCache())
+    def pluginsManager = Mock(DocumentationPluginsManager)
+    pluginsManager.documentationPlugins() >> [new Docket(DocumentationType.SWAGGER_2)]
+    def resources = new InMemorySwaggerResourcesProvider(
+        mockEnvironment(),
+        documentationCache(),
+        pluginsManager)
     resources.swagger1Available = true
     resources.swagger2Available = true
     resources
@@ -133,12 +137,13 @@ class ApiResourceControllerSpec extends Specification {
 
   def documentationCache() {
     def cache = new DocumentationCache()
-    ResourceListing listing = new ResourceListing("1.0", [], [], ApiInfo.DEFAULT)
     cache.addDocumentation(new DocumentationBuilder()
         .name("test")
         .basePath("/base")
-        .resourceListing(listing)
-        .build())
+        .resourceListing {
+          it.apiVersion("1.0")
+              .info(ApiInfo.DEFAULT)
+        }.build())
     cache
   }
 

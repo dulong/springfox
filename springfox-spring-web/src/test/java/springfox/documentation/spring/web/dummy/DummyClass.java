@@ -45,19 +45,28 @@ import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.annotations.ApiIgnore;
 import springfox.documentation.schema.Views;
 import springfox.documentation.spring.web.dummy.DummyModels.Ignorable;
+import springfox.documentation.spring.web.dummy.models.Bar;
+import springfox.documentation.spring.web.dummy.models.Country;
+import springfox.documentation.spring.web.dummy.models.Holder;
+import springfox.documentation.spring.web.dummy.models.House;
 import springfox.documentation.spring.web.dummy.models.EnumType;
 import springfox.documentation.spring.web.dummy.models.Example;
 import springfox.documentation.spring.web.dummy.models.FancyPet;
+import springfox.documentation.spring.web.dummy.models.Foo;
 import springfox.documentation.spring.web.dummy.models.FoobarDto;
 import springfox.documentation.spring.web.dummy.models.MapFancyPet;
 import springfox.documentation.spring.web.dummy.models.Pet;
 import springfox.documentation.spring.web.dummy.models.PetWithJsonView;
 import springfox.documentation.spring.web.dummy.models.Pirate;
 import springfox.documentation.spring.web.dummy.models.RecursiveTypeWithConditions;
+import springfox.documentation.spring.web.dummy.models.RecursiveTypeWithNonEqualsConditionsMiddleWithCircle;
 import springfox.documentation.spring.web.dummy.models.RecursiveTypeWithNonEqualsConditionsOuter;
+import springfox.documentation.spring.web.dummy.models.RecursiveTypeWithNonEqualsConditionsOuterWithModel;
 import springfox.documentation.spring.web.dummy.models.RecursiveTypeWithNonEqualsConditionsOuterWithSubTypes;
 import springfox.documentation.spring.web.dummy.models.SameFancyPet;
+import springfox.documentation.spring.web.dummy.models.Street;
 import springfox.documentation.spring.web.dummy.models.Treeish;
+import springfox.documentation.spring.web.dummy.models.Wrapper;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -472,8 +481,42 @@ public class DummyClass {
   }
 
   @ResponseBody
+  public Wrapper<RecursiveTypeWithNonEqualsConditionsOuterWithModel> methodToTestBidirectionalRecursiveTypesWithModel(
+      @RequestBody Pet model) {
+    throw new UnsupportedOperationException();
+  }
+
+  @ResponseBody
+  public void methodToTestBidirectionalRecursiveTypesWithModel(
+      @RequestBody Wrapper<RecursiveTypeWithNonEqualsConditionsOuterWithModel> model) {
+    throw new UnsupportedOperationException();
+  }
+
+  @ResponseBody
+  public RecursiveTypeWithNonEqualsConditionsOuterWithModel methodToTestBidirectionalRecursiveTypesWithCircle(
+      @RequestBody RecursiveTypeWithNonEqualsConditionsMiddleWithCircle model) {
+    throw new UnsupportedOperationException();
+  }
+
+  @ResponseBody
+  public RecursiveTypeWithNonEqualsConditionsMiddleWithCircle methodToTestBidirectionalRecursiveTypesWithCircle() {
+    throw new UnsupportedOperationException();
+  }
+
+  @ResponseBody
   public RecursiveTypeWithNonEqualsConditionsOuterWithSubTypes methodToTestBidirectionalRecursiveTypesWithKnownTypes(
       @RequestBody RecursiveTypeWithConditions model) {
+    throw new UnsupportedOperationException();
+  }
+
+  @ResponseBody
+  public Holder<Bar> methodToTestSpareModelsWithKnownTypes(
+      @RequestBody Foo model1, @RequestBody Holder<Bar> model2) {
+    throw new UnsupportedOperationException();
+  }
+
+  @ResponseBody
+  public List<House> methodToTestCyclicStructure(@RequestBody Street street, @RequestBody Country country) {
     throw new UnsupportedOperationException();
   }
 
@@ -496,6 +539,22 @@ public class DummyClass {
   @ResponseBody
   @JsonView(Views.SecondView.class)
   public PetWithJsonView methodToTestJsonView(@RequestBody @JsonView(Views.FirstView.class) PetWithJsonView pet) {
+    throw new UnsupportedOperationException();
+  }
+
+  @ResponseBody
+  public List<DummyModels.BusinessModel> methodToTestOrdering(@RequestBody SameFancyPet fancyPet) {
+    throw new UnsupportedOperationException();
+  }
+
+  @ResponseBody
+  public List<DummyModels.BusinessModel> methodToTestOrdering(@RequestBody SameFancyPet fancyPet,
+      @RequestParam String id) {
+    throw new UnsupportedOperationException();
+  }
+
+  @ResponseBody
+  public List<DummyModels.BusinessModel> methodToTestOrdering(@RequestParam String id) {
     throw new UnsupportedOperationException();
   }
 

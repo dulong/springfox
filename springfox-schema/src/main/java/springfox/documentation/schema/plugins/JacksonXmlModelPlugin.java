@@ -40,11 +40,13 @@ public class JacksonXmlModelPlugin implements ModelBuilderPlugin {
     this.typeResolver = typeResolver;
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public void apply(ModelContext context) {
     JacksonXmlRootElement root = AnnotationUtils.findAnnotation(forClass(context), JacksonXmlRootElement.class);
     if (root != null) {
       context.getBuilder().xml(buildXml(root));
+      context.getModelSpecificationBuilder().facets(f -> f.xml(buildXml(root)));
     }
   }
 

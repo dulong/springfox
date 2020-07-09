@@ -34,8 +34,8 @@
         }
     ],
     "produces": [
-        "application/xml",
-        "application/json"
+        "application/json",
+        "application/xml"
     ],
     "paths": {
         "/rest/addresses": {
@@ -44,7 +44,7 @@
                     "Address Entity"
                 ],
                 "summary": "saveAddress",
-                "operationId": "saveAddressUsingPOST_2",
+                "operationId": "saveAddressUsingPOST_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -63,11 +63,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfAddress"
+                            "$ref": "#/definitions/EntityModelOfAddress"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/rest/addresses/{id}": {
@@ -76,7 +75,7 @@
                     "Address Entity"
                 ],
                 "summary": "findByIdAddress",
-                "operationId": "findByIdAddressUsingGET_2",
+                "operationId": "findByIdAddressUsingGET_1",
                 "parameters": [
                     {
                         "name": "id",
@@ -91,18 +90,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfAddress"
+                            "$ref": "#/definitions/EntityModelOfAddress"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "put": {
                 "tags": [
                     "Address Entity"
                 ],
                 "summary": "saveAddress",
-                "operationId": "saveAddressUsingPUT_2",
+                "operationId": "saveAddressUsingPUT_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -129,18 +127,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfAddress"
+                            "$ref": "#/definitions/EntityModelOfAddress"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "delete": {
                 "tags": [
                     "Address Entity"
                 ],
                 "summary": "deleteAddress",
-                "operationId": "deleteAddressUsingDELETE_2",
+                "operationId": "deleteAddressUsingDELETE_1",
                 "parameters": [
                     {
                         "name": "id",
@@ -155,15 +152,14 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             },
             "patch": {
                 "tags": [
                     "Address Entity"
                 ],
                 "summary": "saveAddress",
-                "operationId": "saveAddressUsingPATCH_2",
+                "operationId": "saveAddressUsingPATCH_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -190,11 +186,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfAddress"
+                            "$ref": "#/definitions/EntityModelOfAddress"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/rest/addresses/{id}/person": {
@@ -203,7 +198,7 @@
                     "Address Entity"
                 ],
                 "summary": "addressPerson",
-                "operationId": "addressPersonUsingGET_2",
+                "operationId": "addressPersonUsingGET_1",
                 "produces": [
                     "application/hal+json"
                 ],
@@ -221,18 +216,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfPerson"
+                            "$ref": "#/definitions/EntityModelOfPerson"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "post": {
                 "tags": [
                     "Address Entity"
                 ],
                 "summary": "addressPerson",
-                "operationId": "addressPersonUsingPOST_2",
+                "operationId": "addressPersonUsingPOST_1",
                 "consumes": [
                     "text/uri-list",
                     "application/x-spring-data-compact+json"
@@ -260,18 +254,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfPerson"
+                            "$ref": "#/definitions/EntityModelOfPerson"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "put": {
                 "tags": [
                     "Address Entity"
                 ],
                 "summary": "addressPerson",
-                "operationId": "addressPersonUsingPUT_2",
+                "operationId": "addressPersonUsingPUT_1",
                 "consumes": [
                     "text/uri-list",
                     "application/x-spring-data-compact+json"
@@ -299,18 +292,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfPerson"
+                            "$ref": "#/definitions/EntityModelOfPerson"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "delete": {
                 "tags": [
                     "Address Entity"
                 ],
                 "summary": "addressPerson",
-                "operationId": "addressPersonUsingDELETE_2",
+                "operationId": "addressPersonUsingDELETE_1",
                 "consumes": [
                     "text/uri-list",
                     "application/x-spring-data-compact+json"
@@ -329,15 +321,14 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             },
             "patch": {
                 "tags": [
                     "Address Entity"
                 ],
                 "summary": "addressPerson",
-                "operationId": "addressPersonUsingPATCH_2",
+                "operationId": "addressPersonUsingPATCH_1",
                 "consumes": [
                     "text/uri-list",
                     "application/x-spring-data-compact+json"
@@ -365,11 +356,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfPerson"
+                            "$ref": "#/definitions/EntityModelOfPerson"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/rest/addresses{?page,size,sort}": {
@@ -378,12 +368,12 @@
                     "Address Entity"
                 ],
                 "summary": "findAllAddress",
-                "operationId": "findAllAddressUsingGET_2",
+                "operationId": "findAllAddressUsingGET_1",
                 "produces": [
                     "application/hal+json",
                     "application/json",
-                    "text/uri-list",
-                    "application/x-spring-data-compact+json"
+                    "application/x-spring-data-compact+json",
+                    "text/uri-list"
                 ],
                 "parameters": [
                     {
@@ -391,14 +381,16 @@
                         "in": "query",
                         "description": "page",
                         "required": false,
-                        "type": "string"
+                        "type": "integer",
+                        "format": "int32"
                     },
                     {
                         "name": "size",
                         "in": "query",
                         "description": "size",
                         "required": false,
-                        "type": "string"
+                        "type": "integer",
+                        "format": "int32"
                     },
                     {
                         "name": "sort",
@@ -412,11 +404,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourcesOfAddress"
+                            "$ref": "#/definitions/CollectionModelOfAddress"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/rest/people": {
@@ -425,7 +416,7 @@
                     "Person Entity"
                 ],
                 "summary": "savePerson",
-                "operationId": "savePersonUsingPOST_2",
+                "operationId": "savePersonUsingPOST_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -444,11 +435,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfPerson"
+                            "$ref": "#/definitions/EntityModelOfPerson"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/rest/people/pageable{?page,size,sort}": {
@@ -457,7 +447,7 @@
                     "person-controller"
                 ],
                 "summary": "pageableResults",
-                "operationId": "pageableResultsUsingPATCH_2",
+                "operationId": "pageableResultsUsingPATCH_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -493,8 +483,7 @@
                             }
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/rest/people/search/findByFirstName{?firstName}": {
@@ -503,7 +492,7 @@
                     "Person Entity"
                 ],
                 "summary": "findByFirstNamePerson",
-                "operationId": "findByFirstNamePersonUsingGET_2",
+                "operationId": "findByFirstNamePersonUsingGET_1",
                 "parameters": [
                     {
                         "name": "firstName",
@@ -517,11 +506,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourcesOfPerson"
+                            "$ref": "#/definitions/CollectionModelOfPerson"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/rest/people/search/findByLastName{?name}": {
@@ -531,26 +519,24 @@
                 ],
                 "summary": "findByLastName",
                 "description": "Finds persons by last name",
-                "operationId": "findByLastNamePersonUsingGET_2",
+                "operationId": "findByLastNamePersonUsingGET_1",
                 "parameters": [
                     {
                         "name": "name",
                         "in": "query",
                         "description": "name parameter",
-                        "required": false,
-                        "type": "string",
-                        "allowEmptyValue": false
+                        "required": true,
+                        "type": "string"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourcesOfPerson"
+                            "$ref": "#/definitions/CollectionModelOfPerson"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/rest/people/{id}": {
@@ -559,7 +545,7 @@
                     "Person Entity"
                 ],
                 "summary": "findByIdPerson",
-                "operationId": "findByIdPersonUsingGET_2",
+                "operationId": "findByIdPersonUsingGET_1",
                 "parameters": [
                     {
                         "name": "id",
@@ -574,18 +560,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfPerson"
+                            "$ref": "#/definitions/EntityModelOfPerson"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "put": {
                 "tags": [
                     "Person Entity"
                 ],
                 "summary": "savePerson",
-                "operationId": "savePersonUsingPUT_2",
+                "operationId": "savePersonUsingPUT_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -612,18 +597,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfPerson"
+                            "$ref": "#/definitions/EntityModelOfPerson"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "delete": {
                 "tags": [
                     "Person Entity"
                 ],
                 "summary": "deletePerson",
-                "operationId": "deletePersonUsingDELETE_2",
+                "operationId": "deletePersonUsingDELETE_1",
                 "parameters": [
                     {
                         "name": "id",
@@ -638,15 +622,14 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             },
             "patch": {
                 "tags": [
                     "Person Entity"
                 ],
                 "summary": "savePerson",
-                "operationId": "savePersonUsingPATCH_2",
+                "operationId": "savePersonUsingPATCH_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -673,11 +656,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfPerson"
+                            "$ref": "#/definitions/EntityModelOfPerson"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/rest/people/{id}/personAddress": {
@@ -686,7 +668,7 @@
                     "Person Entity"
                 ],
                 "summary": "personAddress",
-                "operationId": "personAddressUsingGET_2",
+                "operationId": "personAddressUsingGET_1",
                 "produces": [
                     "application/hal+json"
                 ],
@@ -704,18 +686,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfAddress"
+                            "$ref": "#/definitions/EntityModelOfAddress"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "post": {
                 "tags": [
                     "Person Entity"
                 ],
                 "summary": "personAddress",
-                "operationId": "personAddressUsingPOST_2",
+                "operationId": "personAddressUsingPOST_1",
                 "consumes": [
                     "text/uri-list",
                     "application/x-spring-data-compact+json"
@@ -743,18 +724,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfAddress"
+                            "$ref": "#/definitions/EntityModelOfAddress"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "put": {
                 "tags": [
                     "Person Entity"
                 ],
                 "summary": "personAddress",
-                "operationId": "personAddressUsingPUT_2",
+                "operationId": "personAddressUsingPUT_1",
                 "consumes": [
                     "text/uri-list",
                     "application/x-spring-data-compact+json"
@@ -782,18 +762,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfAddress"
+                            "$ref": "#/definitions/EntityModelOfAddress"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "delete": {
                 "tags": [
                     "Person Entity"
                 ],
                 "summary": "personAddress",
-                "operationId": "personAddressUsingDELETE_2",
+                "operationId": "personAddressUsingDELETE_1",
                 "consumes": [
                     "text/uri-list",
                     "application/x-spring-data-compact+json"
@@ -812,15 +791,14 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             },
             "patch": {
                 "tags": [
                     "Person Entity"
                 ],
                 "summary": "personAddress",
-                "operationId": "personAddressUsingPATCH_2",
+                "operationId": "personAddressUsingPATCH_1",
                 "consumes": [
                     "text/uri-list",
                     "application/x-spring-data-compact+json"
@@ -848,11 +826,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfAddress"
+                            "$ref": "#/definitions/EntityModelOfAddress"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/rest/people/{id}/tags": {
@@ -861,7 +838,7 @@
                     "Person Entity"
                 ],
                 "summary": "personTags",
-                "operationId": "personTagsUsingGET_4",
+                "operationId": "personTagsUsingGET_2",
                 "produces": [
                     "application/hal+json"
                 ],
@@ -879,18 +856,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourcesOfTag"
+                            "$ref": "#/definitions/CollectionModelOfTag"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "post": {
                 "tags": [
                     "Person Entity"
                 ],
                 "summary": "personTags",
-                "operationId": "personTagsUsingPOST_2",
+                "operationId": "personTagsUsingPOST_1",
                 "consumes": [
                     "text/uri-list",
                     "application/x-spring-data-compact+json"
@@ -921,18 +897,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourcesOfTag"
+                            "$ref": "#/definitions/CollectionModelOfTag"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "put": {
                 "tags": [
                     "Person Entity"
                 ],
                 "summary": "personTags",
-                "operationId": "personTagsUsingPUT_2",
+                "operationId": "personTagsUsingPUT_1",
                 "consumes": [
                     "text/uri-list",
                     "application/x-spring-data-compact+json"
@@ -963,18 +938,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourcesOfTag"
+                            "$ref": "#/definitions/CollectionModelOfTag"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "delete": {
                 "tags": [
                     "Person Entity"
                 ],
                 "summary": "personTags",
-                "operationId": "personTagsUsingDELETE_4",
+                "operationId": "personTagsUsingDELETE_3",
                 "consumes": [
                     "text/uri-list",
                     "application/x-spring-data-compact+json"
@@ -993,15 +967,14 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             },
             "patch": {
                 "tags": [
                     "Person Entity"
                 ],
                 "summary": "personTags",
-                "operationId": "personTagsUsingPATCH_2",
+                "operationId": "personTagsUsingPATCH_1",
                 "consumes": [
                     "text/uri-list",
                     "application/x-spring-data-compact+json"
@@ -1032,11 +1005,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourcesOfTag"
+                            "$ref": "#/definitions/CollectionModelOfTag"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/rest/people/{id}/tags/{tagId}": {
@@ -1045,7 +1017,7 @@
                     "Person Entity"
                 ],
                 "summary": "personTags",
-                "operationId": "personTagsUsingGET_5",
+                "operationId": "personTagsUsingGET_3",
                 "consumes": [
                     "application/hal+json"
                 ],
@@ -1070,18 +1042,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfTag"
+                            "$ref": "#/definitions/EntityModelOfTag"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "delete": {
                 "tags": [
                     "Person Entity"
                 ],
                 "summary": "personTags",
-                "operationId": "personTagsUsingDELETE_5",
+                "operationId": "personTagsUsingDELETE_2",
                 "consumes": [
                     "text/uri-list",
                     "application/x-spring-data-compact+json"
@@ -1107,8 +1078,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/rest/people/{id}{?lastName}": {
@@ -1118,7 +1088,7 @@
                 ],
                 "summary": "updateLastName",
                 "description": "Updates the persons last name",
-                "operationId": "updateLastNameUsingPATCH_2",
+                "operationId": "updateLastNameUsingPATCH_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -1127,17 +1097,15 @@
                         "name": "lastName",
                         "in": "query",
                         "description": "lastName parameter",
-                        "required": false,
-                        "type": "string",
-                        "allowEmptyValue": false
+                        "required": true,
+                        "type": "string"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/rest/people{?page,size,sort}": {
@@ -1146,12 +1114,12 @@
                     "Person Entity"
                 ],
                 "summary": "findAllPerson",
-                "operationId": "findAllPersonUsingGET_2",
+                "operationId": "findAllPersonUsingGET_1",
                 "produces": [
                     "application/hal+json",
                     "application/json",
-                    "text/uri-list",
-                    "application/x-spring-data-compact+json"
+                    "application/x-spring-data-compact+json",
+                    "text/uri-list"
                 ],
                 "parameters": [
                     {
@@ -1159,14 +1127,16 @@
                         "in": "query",
                         "description": "page",
                         "required": false,
-                        "type": "string"
+                        "type": "integer",
+                        "format": "int32"
                     },
                     {
                         "name": "size",
                         "in": "query",
                         "description": "size",
                         "required": false,
-                        "type": "string"
+                        "type": "integer",
+                        "format": "int32"
                     },
                     {
                         "name": "sort",
@@ -1180,11 +1150,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourcesOfPerson"
+                            "$ref": "#/definitions/CollectionModelOfPerson"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/rest/tags": {
@@ -1193,7 +1162,7 @@
                     "Tag Entity"
                 ],
                 "summary": "saveTag",
-                "operationId": "saveTagUsingPOST_2",
+                "operationId": "saveTagUsingPOST_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -1212,11 +1181,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfTag"
+                            "$ref": "#/definitions/EntityModelOfTag"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/rest/tags/{id}": {
@@ -1225,7 +1193,7 @@
                     "Tag Entity"
                 ],
                 "summary": "findByIdTag",
-                "operationId": "findByIdTagUsingGET_2",
+                "operationId": "findByIdTagUsingGET_1",
                 "parameters": [
                     {
                         "name": "id",
@@ -1240,18 +1208,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfTag"
+                            "$ref": "#/definitions/EntityModelOfTag"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "put": {
                 "tags": [
                     "Tag Entity"
                 ],
                 "summary": "saveTag",
-                "operationId": "saveTagUsingPUT_2",
+                "operationId": "saveTagUsingPUT_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -1278,18 +1245,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfTag"
+                            "$ref": "#/definitions/EntityModelOfTag"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "delete": {
                 "tags": [
                     "Tag Entity"
                 ],
                 "summary": "deleteTag",
-                "operationId": "deleteTagUsingDELETE_2",
+                "operationId": "deleteTagUsingDELETE_1",
                 "parameters": [
                     {
                         "name": "id",
@@ -1304,15 +1270,14 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             },
             "patch": {
                 "tags": [
                     "Tag Entity"
                 ],
                 "summary": "saveTag",
-                "operationId": "saveTagUsingPATCH_2",
+                "operationId": "saveTagUsingPATCH_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -1339,11 +1304,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfTag"
+                            "$ref": "#/definitions/EntityModelOfTag"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/rest/tags/{id}/people": {
@@ -1352,7 +1316,7 @@
                     "Tag Entity"
                 ],
                 "summary": "tagPeople",
-                "operationId": "tagPeopleUsingGET_4",
+                "operationId": "tagPeopleUsingGET_2",
                 "produces": [
                     "application/hal+json"
                 ],
@@ -1370,18 +1334,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourcesOfPerson"
+                            "$ref": "#/definitions/CollectionModelOfPerson"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "post": {
                 "tags": [
                     "Tag Entity"
                 ],
                 "summary": "tagPeople",
-                "operationId": "tagPeopleUsingPOST_2",
+                "operationId": "tagPeopleUsingPOST_1",
                 "consumes": [
                     "text/uri-list",
                     "application/x-spring-data-compact+json"
@@ -1412,18 +1375,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourcesOfPerson"
+                            "$ref": "#/definitions/CollectionModelOfPerson"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "put": {
                 "tags": [
                     "Tag Entity"
                 ],
                 "summary": "tagPeople",
-                "operationId": "tagPeopleUsingPUT_2",
+                "operationId": "tagPeopleUsingPUT_1",
                 "consumes": [
                     "text/uri-list",
                     "application/x-spring-data-compact+json"
@@ -1454,18 +1416,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourcesOfPerson"
+                            "$ref": "#/definitions/CollectionModelOfPerson"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "delete": {
                 "tags": [
                     "Tag Entity"
                 ],
                 "summary": "tagPeople",
-                "operationId": "tagPeopleUsingDELETE_4",
+                "operationId": "tagPeopleUsingDELETE_3",
                 "consumes": [
                     "text/uri-list",
                     "application/x-spring-data-compact+json"
@@ -1484,15 +1445,14 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             },
             "patch": {
                 "tags": [
                     "Tag Entity"
                 ],
                 "summary": "tagPeople",
-                "operationId": "tagPeopleUsingPATCH_2",
+                "operationId": "tagPeopleUsingPATCH_1",
                 "consumes": [
                     "text/uri-list",
                     "application/x-spring-data-compact+json"
@@ -1523,11 +1483,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourcesOfPerson"
+                            "$ref": "#/definitions/CollectionModelOfPerson"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/rest/tags/{id}/people/{personId}": {
@@ -1536,7 +1495,7 @@
                     "Tag Entity"
                 ],
                 "summary": "tagPeople",
-                "operationId": "tagPeopleUsingGET_5",
+                "operationId": "tagPeopleUsingGET_3",
                 "consumes": [
                     "application/hal+json"
                 ],
@@ -1561,18 +1520,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourceOfPerson"
+                            "$ref": "#/definitions/EntityModelOfPerson"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "delete": {
                 "tags": [
                     "Tag Entity"
                 ],
                 "summary": "tagPeople",
-                "operationId": "tagPeopleUsingDELETE_5",
+                "operationId": "tagPeopleUsingDELETE_2",
                 "consumes": [
                     "text/uri-list",
                     "application/x-spring-data-compact+json"
@@ -1598,8 +1556,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/rest/tags{?page,size,sort}": {
@@ -1608,12 +1565,12 @@
                     "Tag Entity"
                 ],
                 "summary": "findAllTag",
-                "operationId": "findAllTagUsingGET_2",
+                "operationId": "findAllTagUsingGET_1",
                 "produces": [
                     "application/hal+json",
                     "application/json",
-                    "text/uri-list",
-                    "application/x-spring-data-compact+json"
+                    "application/x-spring-data-compact+json",
+                    "text/uri-list"
                 ],
                 "parameters": [
                     {
@@ -1621,14 +1578,16 @@
                         "in": "query",
                         "description": "page",
                         "required": false,
-                        "type": "string"
+                        "type": "integer",
+                        "format": "int32"
                     },
                     {
                         "name": "size",
                         "in": "query",
                         "description": "size",
                         "required": false,
-                        "type": "string"
+                        "type": "integer",
+                        "format": "int32"
                     },
                     {
                         "name": "sort",
@@ -1642,11 +1601,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ResourcesOfTag"
+                            "$ref": "#/definitions/CollectionModelOfTag"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         }
     },
@@ -1698,12 +1656,89 @@
             },
             "title": "Category"
         },
+        "CollectionModelOfAddress": {
+            "type": "object",
+            "required": [
+                "_embedded",
+                "_links"
+            ],
+            "properties": {
+                "_embedded": {
+                    "$ref": "#/definitions/EmbeddedCollectionOfAddress"
+                },
+                "_links": {
+                    "type": "object",
+                    "description": "Link collection",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/Link"
+                    }
+                }
+            },
+            "title": "CollectionModelOfAddress",
+            "xml": {
+                "name": "entities",
+                "attribute": false,
+                "wrapped": false
+            },
+            "description": "Resources of Address"
+        },
+        "CollectionModelOfPerson": {
+            "type": "object",
+            "required": [
+                "_embedded",
+                "_links"
+            ],
+            "properties": {
+                "_embedded": {
+                    "$ref": "#/definitions/EmbeddedCollectionOfPerson"
+                },
+                "_links": {
+                    "type": "object",
+                    "description": "Link collection",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/Link"
+                    }
+                }
+            },
+            "title": "CollectionModelOfPerson",
+            "xml": {
+                "name": "entities",
+                "attribute": false,
+                "wrapped": false
+            },
+            "description": "Resources of Person"
+        },
+        "CollectionModelOfTag": {
+            "type": "object",
+            "required": [
+                "_embedded",
+                "_links"
+            ],
+            "properties": {
+                "_embedded": {
+                    "$ref": "#/definitions/EmbeddedCollectionOfTag"
+                },
+                "_links": {
+                    "type": "object",
+                    "description": "Link collection",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/Link"
+                    }
+                }
+            },
+            "title": "CollectionModelOfTag",
+            "xml": {
+                "name": "entities",
+                "attribute": false,
+                "wrapped": false
+            },
+            "description": "Resources of Tag"
+        },
         "EmbeddedCollectionOfAddress": {
             "type": "object",
             "required": [
                 "addresses"
             ],
-            "discriminator": "Embedded collection of Address",
             "properties": {
                 "addresses": {
                     "type": "array",
@@ -1725,7 +1760,6 @@
             "required": [
                 "people"
             ],
-            "discriminator": "Embedded collection of Person",
             "properties": {
                 "people": {
                     "type": "array",
@@ -1747,7 +1781,6 @@
             "required": [
                 "tags"
             ],
-            "discriminator": "Embedded collection of Tag",
             "properties": {
                 "tags": {
                     "type": "array",
@@ -1764,76 +1797,141 @@
             },
             "description": "Embedded collection of Tag"
         },
+        "EntityModelOfAddress": {
+            "type": "object",
+            "properties": {
+                "address1": {
+                    "type": "string"
+                },
+                "address2": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "links": {
+                    "$ref": "#/definitions/Links"
+                },
+                "person": {
+                    "$ref": "#/definitions/Person"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "zip": {
+                    "type": "string"
+                }
+            },
+            "title": "EntityModelOfAddress"
+        },
+        "EntityModelOfPerson": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "$ref": "#/definitions/Address"
+                },
+                "category": {
+                    "$ref": "#/definitions/Category"
+                },
+                "firstName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "lastName": {
+                    "type": "string"
+                },
+                "links": {
+                    "$ref": "#/definitions/Links"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Tag"
+                    }
+                }
+            },
+            "title": "EntityModelOfPerson"
+        },
+        "EntityModelOfTag": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "links": {
+                    "$ref": "#/definitions/Links"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "people": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Person"
+                    }
+                }
+            },
+            "title": "EntityModelOfTag"
+        },
         "Link": {
             "type": "object",
             "properties": {
                 "deprecation": {
-                    "type": "string",
-                    "xml": {
-                        "name": "deprecation",
-                        "attribute": true,
-                        "wrapped": false
-                    }
+                    "type": "string"
                 },
                 "href": {
-                    "type": "string",
-                    "xml": {
-                        "name": "href",
-                        "attribute": true,
-                        "wrapped": false
-                    }
+                    "type": "string"
                 },
                 "hreflang": {
-                    "type": "string",
-                    "xml": {
-                        "name": "hreflang",
-                        "attribute": true,
-                        "wrapped": false
-                    }
+                    "type": "string"
                 },
                 "media": {
-                    "type": "string",
-                    "xml": {
-                        "name": "media",
-                        "attribute": true,
-                        "wrapped": false
-                    }
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "profile": {
+                    "type": "string"
                 },
                 "rel": {
-                    "type": "string",
-                    "xml": {
-                        "name": "rel",
-                        "attribute": true,
-                        "wrapped": false
-                    }
+                    "$ref": "#/definitions/LinkRelation"
+                },
+                "template": {
+                    "$ref": "#/definitions/UriTemplate"
                 },
                 "templated": {
                     "type": "boolean"
                 },
                 "title": {
-                    "type": "string",
-                    "xml": {
-                        "name": "title",
-                        "attribute": true,
-                        "wrapped": false
-                    }
+                    "type": "string"
                 },
                 "type": {
-                    "type": "string",
-                    "xml": {
-                        "name": "type",
-                        "attribute": true,
-                        "wrapped": false
-                    }
+                    "type": "string"
                 }
             },
-            "title": "Link",
-            "xml": {
-                "name": "link",
-                "namespace": "http://www.w3.org/2005/Atom",
-                "attribute": false,
-                "wrapped": false
-            }
+            "title": "Link"
+        },
+        "LinkRelation": {
+            "type": "object",
+            "title": "LinkRelation"
+        },
+        "Links": {
+            "type": "object",
+            "properties": {
+                "empty": {
+                    "type": "boolean"
+                }
+            },
+            "title": "Links"
         },
         "Person": {
             "type": "object",
@@ -1863,213 +1961,6 @@
             },
             "title": "Person"
         },
-        "ResourceOfAddress": {
-            "type": "object",
-            "properties": {
-                "address1": {
-                    "type": "string"
-                },
-                "address2": {
-                    "type": "string"
-                },
-                "city": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "links": {
-                    "type": "array",
-                    "xml": {
-                        "name": "link",
-                        "namespace": "http://www.w3.org/2005/Atom",
-                        "attribute": false,
-                        "wrapped": false
-                    },
-                    "items": {
-                        "$ref": "#/definitions/Link"
-                    }
-                },
-                "person": {
-                    "$ref": "#/definitions/Person"
-                },
-                "state": {
-                    "type": "string"
-                },
-                "zip": {
-                    "type": "string"
-                }
-            },
-            "title": "ResourceOfAddress",
-            "xml": {
-                "name": "ResourceOfAddress",
-                "attribute": false,
-                "wrapped": false
-            }
-        },
-        "ResourceOfPerson": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "$ref": "#/definitions/Address"
-                },
-                "category": {
-                    "$ref": "#/definitions/Category"
-                },
-                "firstName": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "lastName": {
-                    "type": "string"
-                },
-                "links": {
-                    "type": "array",
-                    "xml": {
-                        "name": "link",
-                        "namespace": "http://www.w3.org/2005/Atom",
-                        "attribute": false,
-                        "wrapped": false
-                    },
-                    "items": {
-                        "$ref": "#/definitions/Link"
-                    }
-                },
-                "tags": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Tag"
-                    }
-                }
-            },
-            "title": "ResourceOfPerson",
-            "xml": {
-                "name": "ResourceOfPerson",
-                "attribute": false,
-                "wrapped": false
-            }
-        },
-        "ResourceOfTag": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "links": {
-                    "type": "array",
-                    "xml": {
-                        "name": "link",
-                        "namespace": "http://www.w3.org/2005/Atom",
-                        "attribute": false,
-                        "wrapped": false
-                    },
-                    "items": {
-                        "$ref": "#/definitions/Link"
-                    }
-                },
-                "name": {
-                    "type": "string"
-                },
-                "people": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Person"
-                    }
-                }
-            },
-            "title": "ResourceOfTag",
-            "xml": {
-                "name": "ResourceOfTag",
-                "attribute": false,
-                "wrapped": false
-            }
-        },
-        "ResourcesOfAddress": {
-            "type": "object",
-            "required": [
-                "_embedded",
-                "_links"
-            ],
-            "discriminator": "Resources of Address",
-            "properties": {
-                "_embedded": {
-                    "$ref": "#/definitions/EmbeddedCollectionOfAddress"
-                },
-                "_links": {
-                    "type": "object",
-                    "description": "Link collection",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/Link"
-                    }
-                }
-            },
-            "title": "ResourcesOfAddress",
-            "xml": {
-                "name": "entities",
-                "attribute": false,
-                "wrapped": false
-            },
-            "description": "Resources of Address"
-        },
-        "ResourcesOfPerson": {
-            "type": "object",
-            "required": [
-                "_embedded",
-                "_links"
-            ],
-            "discriminator": "Resources of Person",
-            "properties": {
-                "_embedded": {
-                    "$ref": "#/definitions/EmbeddedCollectionOfPerson"
-                },
-                "_links": {
-                    "type": "object",
-                    "description": "Link collection",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/Link"
-                    }
-                }
-            },
-            "title": "ResourcesOfPerson",
-            "xml": {
-                "name": "entities",
-                "attribute": false,
-                "wrapped": false
-            },
-            "description": "Resources of Person"
-        },
-        "ResourcesOfTag": {
-            "type": "object",
-            "required": [
-                "_embedded",
-                "_links"
-            ],
-            "discriminator": "Resources of Tag",
-            "properties": {
-                "_embedded": {
-                    "$ref": "#/definitions/EmbeddedCollectionOfTag"
-                },
-                "_links": {
-                    "type": "object",
-                    "description": "Link collection",
-                    "additionalProperties": {
-                        "$ref": "#/definitions/Link"
-                    }
-                }
-            },
-            "title": "ResourcesOfTag",
-            "xml": {
-                "name": "entities",
-                "attribute": false,
-                "wrapped": false
-            },
-            "description": "Resources of Tag"
-        },
         "Tag": {
             "type": "object",
             "properties": {
@@ -2088,6 +1979,47 @@
                 }
             },
             "title": "Tag"
+        },
+        "TemplateVariable": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "COMPOSITE_PARAM",
+                        "FRAGMENT",
+                        "PATH_VARIABLE",
+                        "REQUEST_PARAM",
+                        "REQUEST_PARAM_CONTINUED",
+                        "SEGMENT"
+                    ]
+                }
+            },
+            "title": "TemplateVariable"
+        },
+        "UriTemplate": {
+            "type": "object",
+            "properties": {
+                "variableNames": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "variables": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/TemplateVariable"
+                    }
+                }
+            },
+            "title": "UriTemplate"
         }
     }
 }

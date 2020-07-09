@@ -22,8 +22,8 @@
         }
     ],
     "produces": [
-        "application/xml",
-        "application/json"
+        "application/json",
+        "application/xml"
     ],
     "paths": {
         "/foo/create-t": {
@@ -32,7 +32,7 @@
                     "concrete-controller"
                 ],
                 "summary": "create",
-                "operationId": "createUsingPUT_2",
+                "operationId": "createUsingPUT",
                 "consumes": [
                     "application/json"
                 ],
@@ -43,7 +43,7 @@
                         "description": "toCreate",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Resource«Pet»"
+                            "$ref": "#/definitions/EntityModel«Pet»Req"
                         }
                     }
                 ],
@@ -51,8 +51,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/foo/delete-t/{id}": {
@@ -61,7 +60,7 @@
                     "concrete-controller"
                 ],
                 "summary": "delete",
-                "operationId": "deleteUsingDELETE_1",
+                "operationId": "deleteUsingDELETE",
                 "parameters": [
                     {
                         "name": "id",
@@ -75,14 +74,13 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/HttpEntity«Resource«Pet»»"
+                            "$ref": "#/definitions/HttpEntity«EntityModel«Pet»»"
                         }
                     },
                     "405": {
                         "description": "Invalid input"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/foo/get-t/{id}": {
@@ -91,7 +89,7 @@
                     "concrete-controller"
                 ],
                 "summary": "get",
-                "operationId": "getUsingGET_2",
+                "operationId": "getUsingGET",
                 "parameters": [
                     {
                         "name": "id",
@@ -105,14 +103,13 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Resource«Pet»_1"
+                            "$ref": "#/definitions/EntityModel«Pet»Res"
                         }
                     },
                     "405": {
                         "description": "Invalid input"
                     }
-                },
-                "deprecated": false
+                }
             }
         }
     },
@@ -133,204 +130,7 @@
         }
     },
     "definitions": {
-        "HttpEntity«Resource«Pet»»": {
-            "type": "object",
-            "properties": {
-                "body": {
-                    "$ref": "#/definitions/Resource«Pet»_1"
-                }
-            },
-            "title": "HttpEntity«Resource«Pet»»"
-        },
-        "Link_1": {
-            "type": "object",
-            "properties": {
-                "deprecation": {
-                    "type": "string",
-                    "xml": {
-                        "name": "deprecation",
-                        "attribute": true,
-                        "wrapped": false
-                    }
-                },
-                "href": {
-                    "type": "string",
-                    "xml": {
-                        "name": "href",
-                        "attribute": true,
-                        "wrapped": false
-                    }
-                },
-                "hreflang": {
-                    "type": "string",
-                    "xml": {
-                        "name": "hreflang",
-                        "attribute": true,
-                        "wrapped": false
-                    }
-                },
-                "media": {
-                    "type": "string",
-                    "xml": {
-                        "name": "media",
-                        "attribute": true,
-                        "wrapped": false
-                    }
-                },
-                "rel": {
-                    "type": "string",
-                    "xml": {
-                        "name": "rel",
-                        "attribute": true,
-                        "wrapped": false
-                    }
-                },
-                "templated": {
-                    "type": "boolean"
-                },
-                "title": {
-                    "type": "string",
-                    "xml": {
-                        "name": "title",
-                        "attribute": true,
-                        "wrapped": false
-                    }
-                },
-                "type": {
-                    "type": "string",
-                    "xml": {
-                        "name": "type",
-                        "attribute": true,
-                        "wrapped": false
-                    }
-                }
-            },
-            "title": "Link_1",
-            "xml": {
-                "name": "link",
-                "namespace": "http://www.w3.org/2005/Atom",
-                "attribute": false,
-                "wrapped": false
-            }
-        },
-        "Link": {
-            "type": "object",
-            "properties": {
-                "deprecation": {
-                    "type": "string",
-                    "xml": {
-                        "name": "deprecation",
-                        "attribute": true,
-                        "wrapped": false
-                    }
-                },
-                "href": {
-                    "type": "string",
-                    "xml": {
-                        "name": "href",
-                        "attribute": true,
-                        "wrapped": false
-                    }
-                },
-                "hreflang": {
-                    "type": "string",
-                    "xml": {
-                        "name": "hreflang",
-                        "attribute": true,
-                        "wrapped": false
-                    }
-                },
-                "media": {
-                    "type": "string",
-                    "xml": {
-                        "name": "media",
-                        "attribute": true,
-                        "wrapped": false
-                    }
-                },
-                "rel": {
-                    "type": "string",
-                    "xml": {
-                        "name": "rel",
-                        "attribute": true,
-                        "wrapped": false
-                    }
-                },
-                "title": {
-                    "type": "string",
-                    "xml": {
-                        "name": "title",
-                        "attribute": true,
-                        "wrapped": false
-                    }
-                },
-                "type": {
-                    "type": "string",
-                    "xml": {
-                        "name": "type",
-                        "attribute": true,
-                        "wrapped": false
-                    }
-                }
-            },
-            "title": "Link",
-            "xml": {
-                "name": "link",
-                "namespace": "http://www.w3.org/2005/Atom",
-                "attribute": false,
-                "wrapped": false
-            }
-        },
-        "Pet": {
-            "type": "object",
-            "properties": {
-                "age": {
-                    "type": "integer",
-                    "format": "int32"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            },
-            "title": "Pet"
-        },
-        "Resource«Pet»_1": {
-            "type": "object",
-            "properties": {
-                "age": {
-                    "type": "integer",
-                    "format": "int32"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "links": {
-                    "type": "array",
-                    "xml": {
-                        "name": "link",
-                        "namespace": "http://www.w3.org/2005/Atom",
-                        "attribute": false,
-                        "wrapped": false
-                    },
-                    "items": {
-                        "$ref": "#/definitions/Link_1"
-                    }
-                },
-                "name": {
-                    "type": "string"
-                }
-            },
-            "title": "Resource«Pet»_1",
-            "xml": {
-                "name": "Resource«Pet»",
-                "attribute": false,
-                "wrapped": false
-            }
-        },
-        "Resource«Pet»": {
+        "EntityModel«Pet»Req": {
             "type": "object",
             "properties": {
                 "age": {
@@ -350,12 +150,97 @@
                     "type": "string"
                 }
             },
-            "title": "Resource«Pet»",
-            "xml": {
-                "name": "Resource«Pet»",
-                "attribute": false,
-                "wrapped": false
-            }
+            "title": "EntityModel«Pet»Req"
+        },
+        "EntityModel«Pet»Res": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "links": {
+                    "$ref": "#/definitions/Links"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "title": "EntityModel«Pet»Res"
+        },
+        "HttpEntity«EntityModel«Pet»»": {
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/EntityModel«Pet»Res"
+                }
+            },
+            "title": "HttpEntity«EntityModel«Pet»»"
+        },
+        "Link": {
+            "type": "object",
+            "properties": {
+                "deprecation": {
+                    "type": "string"
+                },
+                "href": {
+                    "type": "string"
+                },
+                "hreflang": {
+                    "type": "string"
+                },
+                "media": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "profile": {
+                    "type": "string"
+                },
+                "rel": {
+                    "$ref": "#/definitions/LinkRelation"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            },
+            "title": "Link"
+        },
+        "LinkRelation": {
+            "type": "object",
+            "title": "LinkRelation"
+        },
+        "Links": {
+            "type": "object",
+            "properties": {
+                "empty": {
+                    "type": "boolean"
+                }
+            },
+            "title": "Links"
+        },
+        "Pet": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "title": "Pet"
         }
     }
 }

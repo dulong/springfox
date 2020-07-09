@@ -25,13 +25,13 @@ import org.springframework.data.mapping.PersistentProperty;
 import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
-import springfox.documentation.schema.Types;
+import springfox.documentation.schema.ScalarTypes;
 import springfox.documentation.service.ResolvedMethodParameter;
 import springfox.documentation.spring.web.readers.operation.HandlerMethodResolver;
 
@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
 
 import static org.springframework.web.bind.annotation.RequestMethod.*;
 import static springfox.documentation.schema.Collections.*;
+import static springfox.documentation.schema.ResolvedTypes.*;
 import static springfox.documentation.spring.data.rest.RequestExtractionUtils.*;
 
 abstract class SpecificationBuilder {
@@ -75,7 +76,7 @@ abstract class SpecificationBuilder {
     return new AssociationActionSpecificationBuilder(context, path);
   }
 
-  SpecificationBuilder withPath(String path) {
+  SpecificationBuilder path(String path) {
     this.path = path;
     return this;
   }
@@ -95,7 +96,7 @@ abstract class SpecificationBuilder {
     return this;
   }
 
-  SpecificationBuilder withParameter(ResolvedMethodParameter parameter) {
+  SpecificationBuilder parameter(ResolvedMethodParameter parameter) {
     this.parameters.add(parameter);
     return this;
   }
@@ -124,7 +125,7 @@ abstract class SpecificationBuilder {
     this.path = path;
   }
 
-  abstract SpecificationBuilder withParameterType(ParameterType parameterType);
+  abstract SpecificationBuilder parameterType(ParameterType parameterType);
 
   abstract Optional<ActionSpecification> build();
 
@@ -147,20 +148,20 @@ abstract class SpecificationBuilder {
     }
 
     @Override
-    SpecificationBuilder withParameterType(ParameterType parameterType) {
+    SpecificationBuilder parameterType(ParameterType parameterType) {
 
       int index = this.getParameters().size();
 
       switch (parameterType) {
         case ID:
-          return withParameter(new ResolvedMethodParameter(
+          return parameter(new ResolvedMethodParameter(
               0,
               "id",
               pathAnnotations("id"),
               resolveType(context.getEntityContext(), RepositoryMetadata::getIdType)));
 
         case RESOURCE:
-          return withParameter(new ResolvedMethodParameter(
+          return parameter(new ResolvedMethodParameter(
               0,
               "body",
               bodyAnnotations(),
@@ -169,7 +170,7 @@ abstract class SpecificationBuilder {
               : context.getEntityContext().getTypeResolver().resolve(String.class)));
 
         case ASSOCIATION:
-          return withParameter(new ResolvedMethodParameter(
+          return parameter(new ResolvedMethodParameter(
               index,
               propertyIdentifierName(property),
               pathAnnotations(propertyIdentifierName(property)),
@@ -196,6 +197,7 @@ abstract class SpecificationBuilder {
               getProduces(),
               getConsumes(),
               null,
+              getType(),
               getParameters(),
               returnType(resolver))
           );
@@ -208,6 +210,12 @@ abstract class SpecificationBuilder {
       return String.format("%s%s",
           lowerCamelCaseName(entity.getType().getSimpleName()),
           upperCamelCaseName(property.getName()));
+    }
+
+    private Class<?> getType() {
+      return context.getEntityContext().entity()
+          .map(PersistentEntity::getType)
+          .orElseThrow(() -> new IllegalStateException("Expecting that the entity exists here"));
     }
 
     private ResolvedType returnType(TypeResolver resolver) {
@@ -239,19 +247,20 @@ abstract class SpecificationBuilder {
       return src;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    SpecificationBuilder withParameterType(ParameterType parameterType) {
+    SpecificationBuilder parameterType(ParameterType parameterType) {
 
       switch (parameterType) {
         case ID:
-          return withParameter(new ResolvedMethodParameter(
+          return parameter(new ResolvedMethodParameter(
               0,
               "id",
               pathAnnotations("id", handlerMethod),
               resolveType(context, RepositoryMetadata::getIdType)));
 
         case RESOURCE:
-          return withParameter(new ResolvedMethodParameter(
+          return parameter(new ResolvedMethodParameter(
               0,
               "body",
               bodyAnnotations(handlerMethod),
@@ -262,20 +271,17 @@ abstract class SpecificationBuilder {
           RepositoryRestConfiguration configuration = context.getConfiguration();
           TypeResolver typeResolver = context.getTypeResolver();
 
-          //noinspection unchecked
-          withParameter(new ResolvedMethodParameter(
+          parameter(new ResolvedMethodParameter(
               0,
               configuration.getPageParamName(),
               Collections.EMPTY_LIST,
-              typeResolver.resolve(String.class)));
-          //noinspection unchecked
-          withParameter(new ResolvedMethodParameter(
+              typeResolver.resolve(Integer.class)));
+          parameter(new ResolvedMethodParameter(
               1,
               configuration.getLimitParamName(),
               Collections.EMPTY_LIST,
-              typeResolver.resolve(String.class)));
-          //noinspection unchecked
-          withParameter(new ResolvedMethodParameter(
+              typeResolver.resolve(Integer.class)));
+          parameter(new ResolvedMethodParameter(
               2,
               configuration.getSortParamName(),
               Collections.EMPTY_LIST,
@@ -305,6 +311,7 @@ abstract class SpecificationBuilder {
               getProduces(),
               getConsumes(),
               handlerMethod,
+              getType(),
               inputParameters(),
               inferReturnType(context, handlerMethod))
           );
@@ -324,17 +331,17 @@ abstract class SpecificationBuilder {
           methodResolver.methodReturnType(handler);
 
       if (isContainerType(methodReturnType)) {
-        return resolver.resolve(Resources.class,
+        return resolver.resolve(CollectionModel.class,
             collectionElementType(methodReturnType));
       } else if (Iterable.class.isAssignableFrom(methodReturnType.getErasedType())) {
-        return resolver.resolve(Resources.class, domainReturnType);
-      } else if (Types.isBaseType(domainReturnType)) {
+        return resolver.resolve(CollectionModel.class, domainReturnType);
+      } else if (ScalarTypes.builtInScalarType(domainReturnType).isPresent()) {
         return domainReturnType;
-      } else if (Types.isVoid(domainReturnType)) {
+      } else if (isVoid(domainReturnType)) {
         return resolver.resolve(Void.TYPE);
       }
 
-      return resolver.resolve(Resource.class, domainReturnType);
+      return resolver.resolve(EntityModel.class, domainReturnType);
     }
 
     private List<ResolvedMethodParameter> transferResolvedMethodParameterList(
@@ -347,6 +354,11 @@ abstract class SpecificationBuilder {
       return methodResolver.methodParameters(handler).stream()
           .map(EntityActionSpecificationBuilder::transferResolvedMethodParameter)
           .collect(Collectors.toList());
+    }
+
+    @SuppressWarnings({"OptionalGetWithoutIsPresent", "java:S3655"})
+    private Class<?> getType() {
+      return context.entity().get().getType();
     }
 
     private List<ResolvedMethodParameter> inputParameters() {

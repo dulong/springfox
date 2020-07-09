@@ -38,7 +38,6 @@ import java.util.Map;
 
 import static springfox.documentation.spring.web.paths.Paths.*;
 
-
 @Component
 public class BasePathAwareServicesProvider implements RequestHandlerProvider {
   private final BasePathAwareHandlerMapping basePathAwareMappings;
@@ -55,10 +54,12 @@ public class BasePathAwareServicesProvider implements RequestHandlerProvider {
     this.methodResolver = methodResolver;
     basePathAwareMappings.setApplicationContext(applicationContext);
     basePathAwareMappings.afterPropertiesSet();
-    contextPath = contextPath(servletContext);
+    contextPath = contextPath(servletContext.getContextPath());
   }
 
+  @SuppressWarnings("java:S1872")
   private static boolean isEntitySchemaService(HandlerMethod input) {
+    //For ensuring this bean is in the path (version conflict)
     return input.getBeanType().getSimpleName().equals("RepositorySchemaController");
   }
 

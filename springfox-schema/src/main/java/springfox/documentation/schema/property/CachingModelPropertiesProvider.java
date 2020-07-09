@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import springfox.documentation.schema.ModelProperty;
+import springfox.documentation.schema.PropertySpecification;
 import springfox.documentation.schema.configuration.ObjectMapperConfigured;
 import springfox.documentation.spi.schema.contexts.ModelContext;
 
@@ -36,28 +36,47 @@ import java.util.Map;
 import java.util.function.Function;
 
 
+@SuppressWarnings("deprecation")
 @Component
 @Qualifier("cachedModelProperties")
 public class CachingModelPropertiesProvider implements ModelPropertiesProvider {
   private static final Logger LOGGER = LoggerFactory.getLogger(CachingModelPropertiesProvider.class);
-  private final Map<ModelContext, List<ModelProperty>> cache;
-  private final Function<ModelContext, List<ModelProperty>> lookup;
+  private final Map<ModelContext, List<springfox.documentation.schema.ModelProperty>> cache;
+  private final Map<ModelContext, List<PropertySpecification>> specificationCache;
+  private final Function<ModelContext, List<springfox.documentation.schema.ModelProperty>> lookup;
+  private final Function<ModelContext, List<PropertySpecification>> lookupSpecification;
 
   @Autowired
   public CachingModelPropertiesProvider(
       final TypeResolver resolver,
       @Qualifier("optimized") final ModelPropertiesProvider delegate) {
     cache = new HashMap<>();
+    specificationCache = new HashMap<>();
     lookup = (key) -> delegate.propertiesFor(key.resolvedType(resolver), key);
+    lookupSpecification = (key) -> delegate.propertySpecificationsFor(key.resolvedType(resolver), key);
   }
 
   @Override
-  public List<ModelProperty> propertiesFor(ResolvedType type, ModelContext givenContext) {
+  public List<springfox.documentation.schema.ModelProperty>
+  propertiesFor(ResolvedType type, ModelContext givenContext) {
     try {
       return cache.computeIfAbsent(givenContext, lookup);
     } catch (Exception e) {
       LOGGER.warn("Exception calculating properties for model({}) -> {}. {}",
           type, givenContext.description(), e.getMessage());
+      return new ArrayList<>();
+    }
+  }
+
+  @Override
+  public List<PropertySpecification> propertySpecificationsFor(
+      ResolvedType propertiesHost,
+      ModelContext context) {
+    try {
+      return specificationCache.computeIfAbsent(context, lookupSpecification);
+    } catch (Exception e) {
+      LOGGER.warn("Exception calculating properties for model({}) -> {}. {}",
+                  propertiesHost, context.description(), e.getMessage());
       return new ArrayList<>();
     }
   }

@@ -23,34 +23,35 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import springfox.documentation.spi.schema.UniqueTypeNameAdapter;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 public class TypeNameIndexingAdapter implements UniqueTypeNameAdapter {
 
-  private static final Logger LOG = LoggerFactory.getLogger(TypeNameIndexingAdapter.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(TypeNameIndexingAdapter.class);
 
   private final Map<String, String> knownNames = new HashMap<>();
 
   @Override
   public Map<String, String> getNames() {
-    return new HashMap<>(knownNames);
+    return Collections.unmodifiableMap(knownNames);
   }
 
   @Override
-  public Optional<String> getTypeName(String modelId) {
-    return Optional.ofNullable(knownNames.get(modelId));
+  public Optional<String> getTypeName(String typeId) {
+    return Optional.ofNullable(knownNames.get(typeId));
   }
 
   private boolean checkTypeRegistration(
       String typeName,
-      String modelId) {
-    if (knownNames.containsKey(modelId)) {
-      if (!knownNames.get(modelId).equals(typeName)) {
-        LOG.info("Rewriting type {} with model id: {} is not allowed, because it is already registered",
+      String typeId) {
+    if (knownNames.containsKey(typeId)) {
+      if (!knownNames.get(typeId).equals(typeName)) {
+        LOGGER.debug("Rewriting type {} with model id: {} is not allowed, because it is already registered",
                  typeName,
-                 modelId);
+                 typeId);
         throw new IllegalStateException("Model already registered with different name.");
       } else {
         return true;
@@ -63,59 +64,59 @@ public class TypeNameIndexingAdapter implements UniqueTypeNameAdapter {
   @Override
   public void registerType(
       String typeName,
-      String modelId) {
+      String typeId) {
     if (checkTypeRegistration(
         typeName,
-        modelId)) {
+        typeId)) {
       return;
     }
     knownNames.put(
-        modelId,
+        typeId,
         typeName);
   }
 
   @Override
   public void registerUniqueType(
       String typeName,
-      String modelId) {
+      String typeId) {
     if (checkTypeRegistration(
         typeName,
-        modelId)) {
+        typeId)) {
       return;
     }
     Integer nameIndex = 0;
     String tempName = typeName;
     while (knownNames.values().contains(tempName)) {
       ++nameIndex;
-      tempName = String.format(
-          "%s_%s",
-          typeName,
-          nameIndex);
+      tempName = new StringBuilder(typeName)
+          .append("_")
+          .append(nameIndex).
+          toString();
     }
     knownNames.put(
-        modelId,
+        typeId,
         tempName);
   }
 
   @Override
   public void setEqualityFor(
-      String modelIdOf,
-      String modelIdTo) {
-    if (!knownNames.containsKey(modelIdTo)) {
-      LOG.warn(
+      String typeIdOf,
+      String typeIdTo) {
+    if (!knownNames.containsKey(typeIdTo)) {
+      LOGGER.warn(
           "Model with model id: {} was not found, because it is not registered",
-          modelIdTo);
+          typeIdTo);
       throw new IllegalStateException("Model was not found");
     }
-    if (knownNames.containsKey(modelIdOf) && !knownNames.get(modelIdOf).equals(knownNames.get(modelIdTo))) {
-      LOG.warn(
+    if (knownNames.containsKey(typeIdOf) && !knownNames.get(typeIdOf).equals(knownNames.get(typeIdTo))) {
+      LOGGER.warn(
           "Model with model id: {} already has equality to other model",
-          modelIdTo);
+          typeIdTo);
       throw new IllegalStateException("Model already has equality to other model");
     }
     knownNames.put(
-        modelIdOf,
-        knownNames.get(modelIdTo));
+        typeIdOf,
+        knownNames.get(typeIdTo));
   }
 
 }

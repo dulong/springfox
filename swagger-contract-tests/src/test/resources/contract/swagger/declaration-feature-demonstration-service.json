@@ -1993,7 +1993,6 @@
     },
     "ModelWithMapProperty": {
       "description": "Describes model with map property",
-      "discriminator": "Describes model with map property",
       "id": "ModelWithMapProperty",
       "properties": {
         "params": {
@@ -2208,6 +2207,7 @@
           "required": false,
           "format": "double",
           "type": "number"
+
         }
       }
     },

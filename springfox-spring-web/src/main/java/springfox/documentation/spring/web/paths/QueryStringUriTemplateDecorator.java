@@ -23,7 +23,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import springfox.documentation.service.AllowableListValues;
 import springfox.documentation.service.AllowableValues;
-import springfox.documentation.service.Parameter;
 import springfox.documentation.service.PathDecorator;
 import springfox.documentation.spi.service.contexts.DocumentationContext;
 import springfox.documentation.spi.service.contexts.PathContext;
@@ -33,12 +32,16 @@ import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static java.util.Comparator.*;
 import static java.util.stream.Collectors.*;
 import static org.springframework.util.StringUtils.*;
 
+/**
+ * Since we're no longer using rfc6570
+ * @deprecated @since 3.0.0
+ */
 @Component
 @Order(value = Ordered.HIGHEST_PRECEDENCE + 60)
+@Deprecated
 class QueryStringUriTemplateDecorator implements PathDecorator {
   @Override
   public Function<String, String> decorator(final PathContext context) {
@@ -60,7 +63,9 @@ class QueryStringUriTemplateDecorator implements PathDecorator {
     };
   }
 
-  private String queryTemplatePrefix(String input, String prefilled) {
+  private String queryTemplatePrefix(
+      String input,
+      String prefilled) {
     String prefix;
     if (isEmpty(prefilled)) {
       if (requiresContinuation(input)) {
@@ -78,41 +83,42 @@ class QueryStringUriTemplateDecorator implements PathDecorator {
     return url.contains("?");
   }
 
-  @SuppressWarnings("unchecked")
   private Set<String> queryParamNames(PathContext context) {
     return context.getParameters().stream()
         .filter(queryStringParams().and(onlyOneAllowableValue().negate()))
-        .map(Parameter::getName)
-        .collect(toCollection(() -> new TreeSet(naturalOrder())));
+        .map(springfox.documentation.service.Parameter::getName)
+        .collect(toCollection(TreeSet::new));
   }
 
-  @SuppressWarnings("unchecked")
   private String prefilledQueryParams(PathContext context) {
-    return String.join("&", context.getParameters().stream()
-        .filter(onlyOneAllowableValue())
-        .map(queryStringWithValue())
-        .collect(toCollection(() -> new TreeSet(naturalOrder()))))
-        .trim();
+    return String.join(
+        "&",
+        context.getParameters().stream()
+            .filter(onlyOneAllowableValue())
+            .map(queryStringWithValue())
+            .collect(toCollection(TreeSet::new))).trim();
   }
 
-  private Predicate<Parameter> onlyOneAllowableValue() {
+  private Predicate<springfox.documentation.service.Parameter> onlyOneAllowableValue() {
     return input -> {
       AllowableValues allowableValues = input.getAllowableValues();
-      return allowableValues != null
-          && allowableValues instanceof AllowableListValues
+      return allowableValues instanceof AllowableListValues
           && ((AllowableListValues) allowableValues).getValues().size() == 1;
     };
   }
 
-  private Predicate<Parameter> queryStringParams() {
+  private Predicate<springfox.documentation.service.Parameter> queryStringParams() {
     return input -> "query".equals(input.getParamType());
   }
 
 
-  private Function<Parameter, String> queryStringWithValue() {
+  private Function<springfox.documentation.service.Parameter, String> queryStringWithValue() {
     return input -> {
       AllowableListValues allowableValues = (AllowableListValues) input.getAllowableValues();
-      return String.format("%s=%s", input.getName(), allowableValues.getValues().get(0).trim());
+      return String.format(
+          "%s=%s",
+          input.getName(),
+          allowableValues.getValues().get(0).trim());
     };
   }
 

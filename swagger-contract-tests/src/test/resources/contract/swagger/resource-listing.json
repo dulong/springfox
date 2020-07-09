@@ -2,17 +2,17 @@
     "apiVersion": "1.0",
     "apis": [
         {
-            "description": "Address Entity\nSimple Jpa Repository",
+            "description": "Address\nSimple Jpa Repository",
             "path": "/default/Address Entity",
             "position": 0
         },
         {
-            "description": "Person Entity\nSimple Jpa Repository",
+            "description": "Person\nSimple Jpa Repository",
             "path": "/default/Person Entity",
             "position": 0
         },
         {
-            "description": "Simple Jpa Repository\nTag Entity",
+            "description": "Simple Jpa Repository\nTag",
             "path": "/default/Tag Entity",
             "position": 0
         },
@@ -104,6 +104,11 @@
         {
             "description": "Same Controller",
             "path": "/default/same-controller",
+            "position": 0
+        },
+        {
+            "description": "Cyclic Structures Controller",
+            "path": "/default/cyclic-structures-controller",
             "position": 0
         }
     ],

@@ -19,8 +19,8 @@
         }
     ],
     "produces": [
-        "application/xml",
-        "application/json"
+        "application/json",
+        "application/xml"
     ],
     "paths": {
         "/bugs/1162": {
@@ -29,7 +29,7 @@
                     "Bugs"
                 ],
                 "summary": "bug1162",
-                "operationId": "bug1162UsingPOST_1",
+                "operationId": "bug1162UsingPOST",
                 "consumes": [
                     "application/json"
                 ],
@@ -41,8 +41,7 @@
                             "format": "date"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1209": {
@@ -51,19 +50,20 @@
                     "Bugs"
                 ],
                 "summary": "bug1209",
-                "operationId": "bug1209UsingPOST_1",
+                "operationId": "bug1209UsingPOST",
                 "consumes": [
                     "application/json"
                 ],
                 "parameters": [
                     {
+                        "name": "custom-header",
                         "in": "header",
                         "required": false,
                         "type": "array",
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "multi"
+                        "collectionFormat": "csv"
                     }
                 ],
                 "responses": {
@@ -73,8 +73,7 @@
                             "type": "string"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1306{?paramMap}": {
@@ -83,7 +82,7 @@
                     "Bugs"
                 ],
                 "summary": "bug1306",
-                "operationId": "bug1306UsingPOST_1",
+                "operationId": "bug1306UsingPOST",
                 "consumes": [
                     "application/json"
                 ],
@@ -111,8 +110,7 @@
                             }
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1376-bare": {
@@ -121,7 +119,7 @@
                     "Bugs"
                 ],
                 "summary": "issue1376Bare",
-                "operationId": "issue1376BareUsingPOST_1",
+                "operationId": "issue1376BareUsingPOST",
                 "consumes": [
                     "application/json"
                 ],
@@ -132,8 +130,7 @@
                             "type": "string"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1376-input-bare{?url}": {
@@ -142,7 +139,7 @@
                     "Bugs"
                 ],
                 "summary": "issue1376Input",
-                "operationId": "issue1376InputUsingPOST_2",
+                "operationId": "issue1376InputUsingPOST",
                 "consumes": [
                     "application/json"
                 ],
@@ -159,8 +156,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1376-input-property{?url}": {
@@ -169,7 +165,7 @@
                     "Bugs"
                 ],
                 "summary": "issue1376Input",
-                "operationId": "issue1376InputUsingPOST_3",
+                "operationId": "issue1376InputUsingPOST_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -185,8 +181,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1376-property": {
@@ -195,7 +190,7 @@
                     "Bugs"
                 ],
                 "summary": "issue1376Property",
-                "operationId": "issue1376PropertyUsingPOST_1",
+                "operationId": "issue1376PropertyUsingPOST",
                 "consumes": [
                     "application/json"
                 ],
@@ -206,18 +201,17 @@
                             "$ref": "#/definitions/Bug1376"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1420": {
             "get": {
                 "tags": [
-                    "foo",
-                    "Bugs"
+                    "Bugs",
+                    "foo"
                 ],
                 "summary": "issue1420",
-                "operationId": "issue1420UsingGET_1",
+                "operationId": "issue1420UsingGET",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -225,8 +219,7 @@
                             "type": "string"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1440": {
@@ -235,16 +228,15 @@
                     "Bugs"
                 ],
                 "summary": "issue1440",
-                "operationId": "issue1440UsingGET_1",
+                "operationId": "issue1440UsingGET",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Resource«string»"
+                            "$ref": "#/definitions/EntityModel«string»"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1475": {
@@ -253,7 +245,7 @@
                     "Bugs"
                 ],
                 "summary": "mapOfLists",
-                "operationId": "mapOfListsUsingGET_1",
+                "operationId": "mapOfListsUsingGET",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -267,8 +259,7 @@
                             }
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1475-example": {
@@ -277,7 +268,7 @@
                     "Bugs"
                 ],
                 "summary": "mapOfListOfExample",
-                "operationId": "mapOfListOfExampleUsingGET_1",
+                "operationId": "mapOfListOfExampleUsingGET",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -291,8 +282,7 @@
                             }
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1605": {
@@ -301,7 +291,7 @@
                     "Bugs"
                 ],
                 "summary": "byteArrayResponse",
-                "operationId": "byteArrayResponseUsingGET_1",
+                "operationId": "byteArrayResponseUsingGET",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -310,8 +300,7 @@
                             "format": "byte"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1627": {
@@ -320,7 +309,7 @@
                     "Bugs"
                 ],
                 "summary": "bug1627",
-                "operationId": "bug1627UsingGET_1",
+                "operationId": "bug1627UsingGET",
                 "parameters": [
                     {
                         "in": "body",
@@ -336,8 +325,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1632": {
@@ -346,7 +334,7 @@
                     "Bugs"
                 ],
                 "summary": "fileCustomType",
-                "operationId": "fileCustomTypeUsingGET_1",
+                "operationId": "fileCustomTypeUsingGET",
                 "parameters": [
                     {
                         "in": "body",
@@ -362,8 +350,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1632s": {
@@ -372,7 +359,7 @@
                     "Bugs"
                 ],
                 "summary": "filesCustomType",
-                "operationId": "filesCustomTypeUsingGET_1",
+                "operationId": "filesCustomTypeUsingGET",
                 "parameters": [
                     {
                         "in": "body",
@@ -391,8 +378,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1676": {
@@ -401,7 +387,7 @@
                     "Bugs"
                 ],
                 "summary": "apiModelProperty",
-                "operationId": "apiModelPropertyUsingGET_1",
+                "operationId": "apiModelPropertyUsingGET",
                 "parameters": [
                     {
                         "in": "body",
@@ -417,8 +403,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1697": {
@@ -427,7 +412,7 @@
                     "Bugs"
                 ],
                 "summary": "payloadWithByteBuffer",
-                "operationId": "payloadWithByteBufferUsingGET_1",
+                "operationId": "payloadWithByteBufferUsingGET",
                 "parameters": [
                     {
                         "in": "body",
@@ -443,8 +428,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1722": {
@@ -454,14 +438,14 @@
                 ],
                 "summary": "Remove an apple from a user",
                 "description": "Remove an apple from a user. You must specify the user name and the apple name.",
-                "operationId": "bug1722UsingPOST_1",
+                "operationId": "bug1722UsingPOST",
                 "consumes": [
                     "application/xml",
                     "application/json"
                 ],
                 "produces": [
-                    "application/xml",
-                    "application/json"
+                    "application/json",
+                    "application/xml"
                 ],
                 "parameters": [
                     {
@@ -478,8 +462,7 @@
                     "200": {
                         "description": "The apple is removed"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1734{?offset}": {
@@ -488,7 +471,7 @@
                     "Bugs"
                 ],
                 "summary": "bug1734",
-                "operationId": "bug1734UsingGET_1",
+                "operationId": "bug1734UsingGET",
                 "parameters": [
                     {
                         "name": "offset",
@@ -497,7 +480,6 @@
                         "required": false,
                         "type": "integer",
                         "default": 0,
-                        "allowEmptyValue": false,
                         "format": "int32"
                     }
                 ],
@@ -505,8 +487,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1740": {
@@ -515,7 +496,7 @@
                     "Bugs"
                 ],
                 "summary": "bug1740",
-                "operationId": "bug1740UsingGET_1",
+                "operationId": "bug1740UsingGET",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -523,17 +504,16 @@
                             "$ref": "#/definitions/Bug1740"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
-        "/bugs/1749{?ascending,companyName,email,like,pageNumber,pageSize,set,sortDirection,sortField}": {
+        "/bugs/1749{?ascending,companyName,email,headerNames,like,pageNumber,pageSize,set,sortDirection,sortField,status}": {
             "get": {
                 "tags": [
                     "Bugs"
                 ],
                 "summary": "Retrieve all the companies",
-                "operationId": "getAllPagedUsingGET_1",
+                "operationId": "getAllPagedUsingGET",
                 "parameters": [
                     {
                         "name": "ascending",
@@ -556,6 +536,16 @@
                         "type": "string"
                     },
                     {
+                        "name": "headerNames",
+                        "in": "query",
+                        "required": false,
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv"
+                    },
+                    {
                         "name": "like",
                         "in": "query",
                         "description": "like",
@@ -567,7 +557,7 @@
                         "in": "query",
                         "required": true,
                         "type": "integer",
-                        "minimum": 1.0,
+                        "minimum": 1,
                         "exclusiveMinimum": false,
                         "format": "int32"
                     },
@@ -576,7 +566,7 @@
                         "in": "query",
                         "required": true,
                         "type": "integer",
-                        "maximum": 50.0,
+                        "maximum": 50,
                         "exclusiveMaximum": false,
                         "format": "int32"
                     },
@@ -601,6 +591,13 @@
                         "in": "query",
                         "required": false,
                         "type": "string"
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "type": "integer",
+                        "format": "int32"
                     }
                 ],
                 "responses": {
@@ -613,8 +610,7 @@
                             }
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1750a": {
@@ -623,7 +619,7 @@
                     "Bugs"
                 ],
                 "summary": "bug1750a",
-                "operationId": "bug1750aUsingGET_1",
+                "operationId": "bug1750aUsingGET",
                 "responses": {
                     "200": {
                         "description": "list of ids",
@@ -634,8 +630,7 @@
                     "204": {
                         "description": "no ids found"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1750b": {
@@ -644,7 +639,7 @@
                     "Bugs"
                 ],
                 "summary": "1750b",
-                "operationId": "bug1750bUsingGET_1",
+                "operationId": "bug1750bUsingGET",
                 "responses": {
                     "200": {
                         "description": "list of ids",
@@ -653,13 +648,9 @@
                         }
                     },
                     "204": {
-                        "description": "no ids found",
-                        "schema": {
-                            "type": "string"
-                        }
+                        "description": "no ids found"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1767": {
@@ -691,7 +682,7 @@
                     "Bugs"
                 ],
                 "summary": "bug1777",
-                "operationId": "bug1777UsingGET_1",
+                "operationId": "bug1777UsingGET",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -699,8 +690,7 @@
                             "$ref": "#/definitions/Bug1777"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1778{?e,s}": {
@@ -709,7 +699,7 @@
                     "Bugs"
                 ],
                 "summary": "bug1778",
-                "operationId": "bug1778UsingGET_1",
+                "operationId": "bug1778UsingGET",
                 "parameters": [
                     {
                         "name": "e",
@@ -728,8 +718,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1819a": {
@@ -738,7 +727,7 @@
                     "Bugs"
                 ],
                 "summary": "modelWithListOfEnumsAsJson",
-                "operationId": "modelWithListOfEnumsAsJsonUsingPUT_1",
+                "operationId": "modelWithListOfEnumsAsJsonUsingPUT",
                 "consumes": [
                     "application/json"
                 ],
@@ -757,8 +746,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1819b{?enumTypes}": {
@@ -767,7 +755,7 @@
                     "Bugs"
                 ],
                 "summary": "modelWithListOfEnumsAsModelAttribute",
-                "operationId": "modelWithListOfEnumsAsModelAttributeUsingPOST_1",
+                "operationId": "modelWithListOfEnumsAsModelAttributeUsingPOST",
                 "consumes": [
                     "application/json"
                 ],
@@ -784,7 +772,7 @@
                                 "TWO"
                             ]
                         },
-                        "collectionFormat": "multi",
+                        "collectionFormat": "csv",
                         "enum": [
                             "ONE",
                             "TWO"
@@ -795,8 +783,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1841": {
@@ -805,7 +792,7 @@
                     "Bugs"
                 ],
                 "summary": "method1",
-                "operationId": "method1UsingGET_1",
+                "operationId": "method1UsingGET",
                 "produces": [
                     "application/atom+xml",
                     "application/json;charset=UTF-8"
@@ -814,8 +801,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1864{?somename}": {
@@ -824,7 +810,7 @@
                     "Bugs"
                 ],
                 "summary": "test",
-                "operationId": "testUsingGET_1",
+                "operationId": "testUsingGET",
                 "parameters": [
                     {
                         "name": "somename",
@@ -837,8 +823,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1881": {
@@ -847,7 +832,7 @@
                     "Bugs"
                 ],
                 "summary": "bug1881",
-                "operationId": "bug1881UsingGET_1",
+                "operationId": "bug1881UsingGET",
                 "parameters": [
                     {
                         "in": "body",
@@ -866,8 +851,7 @@
                             "type": "string"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1887/{env}/{list-id}/emails": {
@@ -876,7 +860,7 @@
                     "Bugs"
                 ],
                 "summary": "1887 example",
-                "operationId": "addEmailsToListUsingPOST_1",
+                "operationId": "addEmailsToListUsingPOST",
                 "consumes": [
                     "application/json;charset=UTF-8"
                 ],
@@ -918,8 +902,7 @@
                             "$ref": "#/definitions/Example"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1894": {
@@ -928,7 +911,7 @@
                     "Bugs"
                 ],
                 "summary": "cacheEvict1",
-                "operationId": "cacheEvict1UsingPOST_1",
+                "operationId": "cacheEvict1UsingPOST",
                 "consumes": [
                     "application/x-www-form-urlencoded"
                 ],
@@ -936,8 +919,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1907": {
@@ -946,7 +928,7 @@
                     "Bugs"
                 ],
                 "summary": "xmlPayload",
-                "operationId": "xmlPayloadUsingGET_1",
+                "operationId": "xmlPayloadUsingGET",
                 "produces": [
                     "application/xml"
                 ],
@@ -965,8 +947,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1926/filtered": {
@@ -975,7 +956,7 @@
                     "Bugs"
                 ],
                 "summary": "filtered",
-                "operationId": "filteredUsingGET_1",
+                "operationId": "filteredUsingGET",
                 "parameters": [
                     {
                         "in": "body",
@@ -993,13 +974,12 @@
                         "schema": {
                             "type": "string",
                             "enum": [
-                                "zh",
-                                "en"
+                                "en",
+                                "zh"
                             ]
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1926/not-filtered": {
@@ -1008,7 +988,7 @@
                     "Bugs"
                 ],
                 "summary": "notFiltered",
-                "operationId": "notFilteredUsingGET_1",
+                "operationId": "notFilteredUsingGET",
                 "parameters": [
                     {
                         "in": "body",
@@ -1026,13 +1006,12 @@
                         "schema": {
                             "type": "string",
                             "enum": [
-                                "zh",
-                                "en"
+                                "en",
+                                "zh"
                             ]
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1939{?credential-source-id,password,username}": {
@@ -1041,7 +1020,7 @@
                     "Bugs"
                 ],
                 "summary": "authenticate a user using a given set of credentials, producing a JWT token that may be used for future API operations if successful",
-                "operationId": "authenticateUsingGET_1",
+                "operationId": "authenticateUsingGET",
                 "produces": [
                     "application/jwt"
                 ],
@@ -1075,8 +1054,7 @@
                             "type": "string"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1965": {
@@ -1085,47 +1063,50 @@
                     "Bugs"
                 ],
                 "summary": "bug1965",
-                "operationId": "bug1965UsingPOST_1",
+                "operationId": "bug1965UsingPOST",
                 "consumes": [
                     "multipart/form-data"
                 ],
                 "parameters": [
                     {
-                        "name": "file",
                         "in": "formData",
-                        "description": "file",
+                        "name": "body",
                         "required": false,
-                        "type": "file"
-                    },
-                    {
-                        "in": "formData",
-                        "name": "paramMap",
-                        "description": "paramMap",
-                        "required": true,
                         "schema": {
                             "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
+                            "required": [
+                                "paramMap",
+                                "sfData",
+                                "sfId"
+                            ],
+                            "properties": {
+                                "paramMap": {
+                                    "type": "object",
+                                    "description": "paramMap",
+                                    "additionalProperties": {
+                                        "type": "string"
+                                    }
+                                },
+                                "sfData": {
+                                    "description": "sfData",
+                                    "$ref": "#/definitions/Example"
+                                },
+                                "sfId": {
+                                    "type": "integer",
+                                    "format": "int32",
+                                    "description": "sfId"
+                                }
                             }
                         }
                     },
                     {
-                        "in": "formData",
-                        "name": "sfData",
-                        "description": "sfData",
-                        "required": true,
+                        "in": "body",
+                        "name": "file",
+                        "description": "file",
+                        "required": false,
                         "schema": {
-                            "$ref": "#/definitions/Example"
-                        }
-                    },
-                    {
-                        "in": "formData",
-                        "name": "sfId",
-                        "description": "sfId",
-                        "required": true,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int32"
+                            "type": "string",
+                            "format": "binary"
                         }
                     }
                 ],
@@ -1136,8 +1117,7 @@
                             "$ref": "#/definitions/Example"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/1965-form-data": {
@@ -1146,101 +1126,73 @@
                     "Bugs"
                 ],
                 "summary": "bug1965FormData",
-                "operationId": "bug1965FormDataUsingPOST_1",
+                "operationId": "bug1965FormDataUsingPOST",
                 "consumes": [
                     "multipart/form-data"
                 ],
                 "parameters": [
                     {
                         "in": "formData",
-                        "name": "allCapsSet",
-                        "description": "description of allCapsSet",
+                        "name": "body",
                         "required": false,
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
+                            "type": "object",
+                            "required": [
+                                "foo",
+                                "localDateTime"
+                            ],
+                            "properties": {
+                                "allCapsSet": {
+                                    "type": "array",
+                                    "description": "description of allCapsSet",
+                                    "uniqueItems": true,
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "annotatedEnumType": {
+                                    "type": "string",
+                                    "description": "description of annotatedEnumType",
+                                    "enum": [
+                                        "ONE",
+                                        "TWO"
+                                    ]
+                                },
+                                "bar": {
+                                    "type": "integer",
+                                    "format": "int32",
+                                    "description": "description of bar"
+                                },
+                                "enumType": {
+                                    "type": "string",
+                                    "enum": [
+                                        "ONE",
+                                        "TWO"
+                                    ]
+                                },
+                                "foo": {
+                                    "type": "string",
+                                    "description": "description of foo"
+                                },
+                                "localDateTime": {
+                                    "type": "string",
+                                    "format": "date-time",
+                                    "description": "local date time desc dd-MM-yyyy hh:mm:ss"
+                                },
+                                "nestedType.name": {
+                                    "type": "string"
+                                },
+                                "parentBeanProperty": {
+                                    "type": "string"
+                                },
+                                "propertyWithNoSetterMethod": {
+                                    "type": "string"
+                                },
+                                "readOnlyString": {
+                                    "type": "string",
+                                    "description": "A read only string"
+                                }
                             }
-                        }
-                    },
-                    {
-                        "in": "formData",
-                        "name": "annotatedEnumType",
-                        "description": "description of annotatedEnumType",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "in": "formData",
-                        "name": "bar",
-                        "description": "description of bar",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int32",
-                            "example": "10"
-                        }
-                    },
-                    {
-                        "in": "formData",
-                        "name": "enumType",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "in": "formData",
-                        "name": "foo",
-                        "description": "description of foo",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "in": "formData",
-                        "name": "localDateTime",
-                        "description": "local date time desc dd-MM-yyyy hh:mm:ss",
-                        "required": true,
-                        "schema": {
-                            "type": "string",
-                            "format": "date-time"
-                        }
-                    },
-                    {
-                        "in": "formData",
-                        "name": "nestedType.name",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "in": "formData",
-                        "name": "parentBeanProperty",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "in": "formData",
-                        "name": "propertyWithNoSetterMethod",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "in": "formData",
-                        "name": "readOnlyString",
-                        "description": "A read only string",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
                         }
                     }
                 ],
@@ -1251,8 +1203,7 @@
                             "$ref": "#/definitions/Example"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/2029{?name}": {
@@ -1262,7 +1213,7 @@
                 ],
                 "summary": "测试RequesetParam",
                 "description": "测试RequesetParam",
-                "operationId": "bug2020UsingGET_1",
+                "operationId": "bug2020UsingGET",
                 "parameters": [
                     {
                         "name": "date",
@@ -1286,8 +1237,7 @@
                             "type": "string"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/2081{?a.importantField,b.importantField}": {
@@ -1296,7 +1246,7 @@
                     "Bugs"
                 ],
                 "summary": "bug2081",
-                "operationId": "bug2081UsingGET_1",
+                "operationId": "bug2081UsingGET",
                 "parameters": [
                     {
                         "name": "a.importantField",
@@ -1315,8 +1265,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/2107/{someId}": {
@@ -1325,7 +1274,7 @@
                     "Bugs"
                 ],
                 "summary": "2107",
-                "operationId": "getSomeByIdUsingGET_1",
+                "operationId": "getSomeByIdUsingGET",
                 "produces": [
                     "application/json"
                 ],
@@ -1346,8 +1295,7 @@
                             "type": "string"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/2114{?clearIndex,siteSecret,stripHtmlTags,xmlUrl}": {
@@ -1356,7 +1304,7 @@
                     "Bugs"
                 ],
                 "summary": "bug2114",
-                "operationId": "bug2114UsingPUT_1",
+                "operationId": "bug2114UsingPUT",
                 "consumes": [
                     "application/json"
                 ],
@@ -1405,8 +1353,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/2118": {
@@ -1415,7 +1362,7 @@
                     "Bugs"
                 ],
                 "summary": "bug2118",
-                "operationId": "bug2118UsingGET_1",
+                "operationId": "bug2118UsingGET",
                 "parameters": [
                     {
                         "in": "body",
@@ -1434,8 +1381,7 @@
                             "type": "string"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/2161": {
@@ -1444,7 +1390,7 @@
                     "Bugs"
                 ],
                 "summary": "bug2161And2249and2469",
-                "operationId": "bug2161And2249and2469UsingGET_1",
+                "operationId": "bug2161And2249and2469UsingGET",
                 "parameters": [
                     {
                         "in": "body",
@@ -1463,19 +1409,18 @@
                             "type": "string"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/2268{?$filter}": {
             "get": {
                 "tags": [
-                    "example",
-                    "Bugs"
+                    "Bugs",
+                    "example"
                 ],
                 "summary": "Get all examples",
                 "description": "Get all examples ",
-                "operationId": "bug2268_1",
+                "operationId": "bug2268",
                 "produces": [
                     "application/json"
                 ],
@@ -1485,8 +1430,7 @@
                         "in": "query",
                         "description": "Filter the list",
                         "required": false,
-                        "type": "string",
-                        "allowEmptyValue": false
+                        "type": "string"
                     }
                 ],
                 "responses": {
@@ -1505,15 +1449,8 @@
                         "petstore_auth": [
                             "read"
                         ]
-                    },
-                    {
-                        "user_auth": [
-                            "ADMIN",
-                            "USER"
-                        ]
                     }
-                ],
-                "deprecated": false
+                ]
             }
         },
         "/bugs/2368": {
@@ -1522,13 +1459,12 @@
                     "Bugs"
                 ],
                 "summary": "bug2368",
-                "operationId": "bug2368UsingGET_1",
+                "operationId": "bug2368UsingGET",
                 "responses": {
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/2378": {
@@ -1537,7 +1473,7 @@
                     "Bugs"
                 ],
                 "summary": "upperCaseField",
-                "operationId": "upperCaseFieldUsingPOST_1",
+                "operationId": "upperCaseFieldUsingPOST",
                 "consumes": [
                     "application/json"
                 ],
@@ -1556,8 +1492,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/2391{?from_country_id}": {
@@ -1566,7 +1501,7 @@
                     "Bugs"
                 ],
                 "summary": "bug2391",
-                "operationId": "bug2391UsingPOST_1",
+                "operationId": "bug2391UsingPOST",
                 "consumes": [
                     "application/json"
                 ],
@@ -1583,8 +1518,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/2415": {
@@ -1593,7 +1527,7 @@
                     "Bugs"
                 ],
                 "summary": "bug2415",
-                "operationId": "bug2415UsingPOST_1",
+                "operationId": "bug2415UsingPOST",
                 "consumes": [
                     "application/json"
                 ],
@@ -1612,8 +1546,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/2415{?input}": {
@@ -1622,7 +1555,7 @@
                     "Bugs"
                 ],
                 "summary": "bug2415",
-                "operationId": "bug2415UsingGET_1",
+                "operationId": "bug2415UsingGET",
                 "parameters": [
                     {
                         "name": "input",
@@ -1642,8 +1575,7 @@
                             "type": "string"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/2423{?from,to}": {
@@ -1652,7 +1584,7 @@
                     "Bugs"
                 ],
                 "summary": "bug2423",
-                "operationId": "bug2423UsingGET_1",
+                "operationId": "bug2423UsingGET",
                 "parameters": [
                     {
                         "name": "from",
@@ -1671,8 +1603,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/2479": {
@@ -1681,7 +1612,7 @@
                     "Bugs"
                 ],
                 "summary": "bug2479",
-                "operationId": "bug2479UsingPOST_1",
+                "operationId": "bug2479UsingPOST",
                 "consumes": [
                     "application/json"
                 ],
@@ -1700,43 +1631,112 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
-        "/bugs/2822":{
-            "post":{
-                "tags":[
+        "/bugs/2822": {
+            "post": {
+                "tags": [
                     "Bugs"
                 ],
-                "summary":"bug2822",
-                "operationId":"bug2822UsingPOST_1",
-                "consumes":[
+                "summary": "bug2822",
+                "operationId": "bug2822UsingPOST",
+                "consumes": [
                     "application/json"
                 ],
-                "parameters":[
+                "parameters": [
                     {
-                        "in":"body",
-                        "name":"message",
-                        "description":"message",
-                        "required":false,
-                        "schema":{
-                            "type":"string",
-                            "example":{
-                                "value":"exampleMessage",
-                                "mediaType":{
-                                    "present":false
-                                }
-                            }
+                        "in": "body",
+                        "name": "message",
+                        "description": "message",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "exampleMessage"
                         }
                     }
                 ],
-                "responses":{
-                    "200":{
-                        "description":"OK"
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     }
-                },
-                "deprecated":false
+                }
+            }
+        },
+        "/bugs/3321{?expand}": {
+            "get": {
+                "tags": [
+                    "Bugs"
+                ],
+                "summary": "bug3321",
+                "operationId": "bug3321UsingGET",
+                "parameters": [
+                    {
+                        "name": "expand",
+                        "in": "query",
+                        "description": "expand",
+                        "required": false,
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "ONE",
+                                "THREE",
+                                "TWO"
+                            ]
+                        },
+                        "collectionFormat": "csv",
+                        "enum": [
+                            "one",
+                            "three",
+                            "two"
+                        ]
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/bugs/3351/{id}": {
+            "post": {
+                "tags": [
+                    "Bugs"
+                ],
+                "summary": "createPost",
+                "operationId": "createPostUsingPOST",
+                "consumes": [
+                    "application/json"
+                ],
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "id",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    {
+                        "in": "body",
+                        "name": "post",
+                        "description": "post",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Pet"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
             }
         },
         "/bugs/bug1827{?authorIds,authors[0].books[0].id,authors[0].books[0].name,authors[0].id,authors[0].name,id,name}": {
@@ -1745,7 +1745,7 @@
                     "Bugs"
                 ],
                 "summary": "addBook",
-                "operationId": "addBookUsingGET_1",
+                "operationId": "addBookUsingGET",
                 "parameters": [
                     {
                         "name": "authorIds",
@@ -1756,7 +1756,7 @@
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "multi"
+                        "collectionFormat": "csv"
                     },
                     {
                         "name": "authors[0].books[0].id",
@@ -1805,8 +1805,7 @@
                             "type": "string"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/bug1944": {
@@ -1815,7 +1814,7 @@
                     "Bugs"
                 ],
                 "summary": "bug1944",
-                "operationId": "bug1944UsingGET_1",
+                "operationId": "bug1944UsingGET",
                 "responses": {
                     "200": {
                         "description": "The object was deleted successfully."
@@ -1823,8 +1822,7 @@
                     "404": {
                         "description": "No object was found with the given ID"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/bug2182": {
@@ -1833,7 +1831,7 @@
                     "Bugs"
                 ],
                 "summary": "/bug2182",
-                "operationId": "bug2182UsingGET_1",
+                "operationId": "bug2182UsingGET",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1841,8 +1839,7 @@
                             "$ref": "#/definitions/ProductVO"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/bug2203": {
@@ -1851,7 +1848,7 @@
                     "Bugs"
                 ],
                 "summary": "bug2203",
-                "operationId": "bug2203UsingGET_1",
+                "operationId": "bug2203UsingGET",
                 "produces": [
                     "application/json;charset=UTF-8"
                 ],
@@ -1862,8 +1859,7 @@
                             "$ref": "#/definitions/Response«LanguageResponse»"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/bug2220": {
@@ -1872,31 +1868,7 @@
                     "Bugs"
                 ],
                 "summary": "bug2220",
-                "operationId": "bug2220UsingGET_2",
-                "parameters": [
-                    {
-                        "name": "bar",
-                        "in": "path",
-                        "description": "bar",
-                        "required": false,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                },
-                "deprecated": false
-            }
-        },
-        "/bugs/bug2220/{bar}": {
-            "get": {
-                "tags": [
-                    "Bugs"
-                ],
-                "summary": "bug2220",
-                "operationId": "bug2220UsingGET_3",
+                "operationId": "bug2220UsingGET",
                 "parameters": [
                     {
                         "name": "bar",
@@ -1910,8 +1882,30 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
+            }
+        },
+        "/bugs/bug2220/{bar}": {
+            "get": {
+                "tags": [
+                    "Bugs"
+                ],
+                "summary": "bug2220",
+                "operationId": "bug2220UsingGET_1",
+                "parameters": [
+                    {
+                        "name": "bar",
+                        "in": "path",
+                        "description": "bar",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
             }
         },
         "/bugs/bug2230": {
@@ -1920,7 +1914,7 @@
                     "Bugs"
                 ],
                 "summary": "/bug2230",
-                "operationId": "bug2230UsingPOST_1",
+                "operationId": "bug2230UsingPOST",
                 "consumes": [
                     "application/atom+xml"
                 ],
@@ -1942,8 +1936,7 @@
                             "type": "string"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/bug2282": {
@@ -1952,7 +1945,7 @@
                     "Bugs"
                 ],
                 "summary": "/bug2282",
-                "operationId": "bug2282UsingGET_1",
+                "operationId": "bug2282UsingGET",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1960,8 +1953,7 @@
                             "type": "string"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/{bar}/2148{?year}": {
@@ -1970,16 +1962,15 @@
                     "Bugs"
                 ],
                 "summary": "bug2148",
-                "operationId": "bug2148UsingGET_1",
+                "operationId": "bug2148UsingGET",
                 "parameters": [
                     {
                         "name": "bar",
+                        "in": "path",
                         "description": "example",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "format": "int64"
-                        }
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
                     },
                     {
                         "name": "year",
@@ -1997,8 +1988,7 @@
                             "$ref": "#/definitions/Example"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/bugs/{propertyKey}/{environmentKey}": {
@@ -2007,13 +1997,13 @@
                     "Bugs"
                 ],
                 "summary": "getProperty",
-                "operationId": "getPropertyUsingGET_1",
+                "operationId": "getPropertyUsingGET",
                 "parameters": [
                     {
                         "name": "environmentKey",
                         "in": "path",
                         "description": "Key of the environment",
-                        "required": false,
+                        "required": true,
                         "type": "string"
                     },
                     {
@@ -2031,8 +2021,7 @@
                             "type": "string"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         }
     },
@@ -2053,13 +2042,6 @@
         }
     },
     "definitions": {
-        "ApplicationLang": {
-            "type": "object",
-            "title": "ApplicationLang",
-            "additionalProperties": {
-                "$ref": "#/definitions/Language"
-            }
-        },
         "Bug1376": {
             "type": "object",
             "properties": {
@@ -2122,7 +2104,6 @@
             "required": [
                 "longitude"
             ],
-            "discriminator": "Test 1777",
             "properties": {
                 "longitude": {
                     "type": "number",
@@ -2270,11 +2251,21 @@
                 "wrapped": false
             }
         },
+        "EntityModel«string»": {
+            "type": "object",
+            "properties": {
+                "links": {
+                    "$ref": "#/definitions/Links"
+                }
+            },
+            "title": "EntityModel«string»"
+        },
         "Example": {
             "type": "object",
             "properties": {
                 "allCapsSet": {
                     "type": "array",
+                    "uniqueItems": true,
                     "items": {
                         "type": "string"
                     }
@@ -2341,8 +2332,8 @@
                 "lang": {
                     "type": "string",
                     "enum": [
-                        "zh",
-                        "en"
+                        "en",
+                        "zh"
                     ]
                 }
             },
@@ -2354,26 +2345,12 @@
                 "lang": {
                     "type": "string",
                     "enum": [
-                        "zh",
-                        "en"
+                        "en",
+                        "zh"
                     ]
                 }
             },
             "title": "LangNotFilteredWrapper"
-        },
-        "Language": {
-            "type": "object",
-            "title": "Language",
-            "additionalProperties": {
-                "$ref": "#/definitions/LanguageText"
-            }
-        },
-        "LanguageResponse": {
-            "type": "object",
-            "title": "LanguageResponse",
-            "additionalProperties": {
-                "$ref": "#/definitions/ApplicationLang"
-            }
         },
         "LanguageText": {
             "type": "object",
@@ -2384,14 +2361,14 @@
             },
             "title": "LanguageText"
         },
-        "LinkAlternate": {
+        "Links": {
             "type": "object",
             "properties": {
-                "href": {
-                    "type": "string"
+                "empty": {
+                    "type": "boolean"
                 }
             },
-            "title": "LinkAlternate"
+            "title": "Links"
         },
         "Model1819": {
             "type": "object",
@@ -2450,6 +2427,22 @@
             },
             "title": "NestedType"
         },
+        "Pet": {
+            "type": "object",
+            "properties": {
+                "age": {
+                    "type": "integer",
+                    "format": "int32"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "title": "Pet"
+        },
         "ProductVO": {
             "type": "object",
             "properties": {
@@ -2465,52 +2458,17 @@
             },
             "title": "ProductVO"
         },
-        "Resource«string»": {
-            "type": "object",
-            "properties": {
-                "links": {
-                    "type": "object",
-                    "xml": {
-                        "name": "link",
-                        "namespace": "http://www.w3.org/2005/Atom",
-                        "attribute": false,
-                        "wrapped": false
-                    },
-                    "additionalProperties": {
-                        "$ref": "#/definitions/LinkAlternate"
-                    }
-                }
-            },
-            "title": "Resource«string»",
-            "xml": {
-                "name": "Resource«string»",
-                "attribute": false,
-                "wrapped": false
-            }
-        },
         "Response«LanguageResponse»": {
             "type": "object",
             "properties": {
-                "data": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "object",
-                        "additionalProperties": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "$ref": "#/definitions/LanguageText"
-                            }
-                        }
-                    }
+                "cancelled": {
+                    "type": "boolean"
                 },
-                "errors": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                "context": {
+                    "type": "object"
                 },
-                "uuid": {
-                    "type": "string"
+                "done": {
+                    "type": "boolean"
                 }
             },
             "title": "Response«LanguageResponse»"

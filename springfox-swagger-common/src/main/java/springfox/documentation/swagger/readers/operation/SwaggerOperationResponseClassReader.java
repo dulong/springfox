@@ -44,6 +44,7 @@ import static springfox.documentation.swagger.annotations.Annotations.*;
 
 @Component
 @Order(SwaggerPluginSupport.SWAGGER_PLUGIN_ORDER)
+@SuppressWarnings("deprecation")
 public class SwaggerOperationResponseClassReader implements OperationBuilderPlugin {
   private static Logger log = LoggerFactory.getLogger(SwaggerOperationResponseClassReader.class);
   private final TypeResolver typeResolver;
@@ -65,7 +66,7 @@ public class SwaggerOperationResponseClassReader implements OperationBuilderPlug
 
     ResolvedType returnType = context.alternateFor(context.getReturnType());
     returnType = context.findAnnotation(ApiOperation.class)
-        .map(resolvedTypeFromOperation(typeResolver, returnType))
+        .map(resolvedTypeFromApiOperation(typeResolver, returnType))
         .orElse(returnType);
     if (canSkip(context, returnType)) {
       return;
@@ -75,7 +76,7 @@ public class SwaggerOperationResponseClassReader implements OperationBuilderPlug
         returnType,
         Optional.empty());
 
-    final Map<String, String> knownNames = new HashMap<>();
+    Map<String, String> knownNames = new HashMap<>();
     Optional.ofNullable(context.getKnownModels().get(modelContext.getParameterId()))
         .orElse(new HashSet<>())
         .forEach(model -> knownNames.put(model.getId(), model.getName()));

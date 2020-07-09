@@ -19,6 +19,7 @@
 package springfox.documentation.spring.data.rest.configuration;
 
 import com.fasterxml.classmate.TypeResolver;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -27,21 +28,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
 import springfox.documentation.annotations.Incubating;
 import springfox.documentation.builders.AlternateTypeBuilder;
-import springfox.documentation.builders.AlternateTypePropertyBuilder;
 import springfox.documentation.schema.AlternateTypeRule;
 import springfox.documentation.schema.AlternateTypeRuleConvention;
 
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static java.util.Collections.*;
-import static java.util.stream.Collectors.*;
 import static springfox.documentation.schema.AlternateTypeRules.*;
 
 @Configuration
 @ComponentScan(basePackages = "springfox.documentation.spring.data.rest")
 @Incubating("2.5.0")
+@ConditionalOnClass(RepositoryRestConfiguration.class)
 public class SpringDataRestConfiguration {
 
   // tag::alternate-type-rule-convention[]
@@ -64,7 +63,7 @@ public class SpringDataRestConfiguration {
       }
     };
   }
-  // tag::alternate-type-rule-convention[]
+  // end::alternate-type-rule-convention[]
 
   // tag::alternate-type-builder[]
   private Type pageableMixin(RepositoryRestConfiguration restConfiguration) {
@@ -73,20 +72,19 @@ public class SpringDataRestConfiguration {
             String.format("%s.generated.%s",
                 Pageable.class.getPackage().getName(),
                 Pageable.class.getSimpleName()))
-        .withProperties(Stream.of(
-            property(Integer.class, restConfiguration.getPageParamName()),
-            property(Integer.class, restConfiguration.getLimitParamName()),
-            property(String.class, restConfiguration.getSortParamName())
-        ).collect(toList()))
+        .property(p -> p.name(restConfiguration.getPageParamName())
+            .type(Integer.class)
+            .canRead(true)
+            .canWrite(true))
+        .property(p -> p.name(restConfiguration.getLimitParamName())
+            .type(Integer.class)
+            .canRead(true)
+            .canWrite(true))
+        .property(p -> p.name(restConfiguration.getSortParamName())
+            .type(String.class)
+            .canRead(true)
+            .canWrite(true))
         .build();
   }
-
-  private AlternateTypePropertyBuilder property(Class<?> type, String name) {
-    return new AlternateTypePropertyBuilder()
-        .withName(name)
-        .withType(type)
-        .withCanRead(true)
-        .withCanWrite(true);
-  }
-  // tag::alternate-type-builder[]
+  // end::alternate-type-builder[]
 }

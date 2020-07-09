@@ -20,22 +20,23 @@
 package springfox.documentation.swagger.web;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 
-import static java.util.Optional.*;
-
-@Controller
+@RestController
 @ApiIgnore
-@RequestMapping("/swagger-resources")
+@RequestMapping({
+    "${springfox.documentation.swagger-ui.base-url:}/swagger-resources"})
 public class ApiResourceController {
-
 
   @Autowired(required = false)
   private SecurityConfiguration securityConfiguration;
@@ -45,26 +46,30 @@ public class ApiResourceController {
   private final SwaggerResourcesProvider swaggerResources;
 
   @Autowired
-  public ApiResourceController(SwaggerResourcesProvider swaggerResources) {
+  public ApiResourceController(
+      SwaggerResourcesProvider swaggerResources,
+      @Value("${springfox.documentation.swagger-ui.base-url:}") String swaggerUiBaseUrl) {
     this.swaggerResources = swaggerResources;
+    this.uiConfiguration = UiConfigurationBuilder.builder()
+        .copyOf(uiConfiguration)
+        .swaggerUiBaseUrl(StringUtils.trimTrailingCharacter(swaggerUiBaseUrl, '/'))
+        .build();
+    this.securityConfiguration = SecurityConfigurationBuilder.builder()
+        .copyOf(securityConfiguration)
+        .build();
   }
 
-  @RequestMapping(value = "/configuration/security")
-  @ResponseBody
+  @GetMapping(value = "/configuration/security", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<SecurityConfiguration> securityConfiguration() {
-    return new ResponseEntity<>(
-        ofNullable(securityConfiguration).orElse(SecurityConfigurationBuilder.builder().build()), HttpStatus.OK);
+    return new ResponseEntity<>(securityConfiguration, HttpStatus.OK);
   }
 
-  @RequestMapping(value = "/configuration/ui")
-  @ResponseBody
+  @GetMapping(value = "/configuration/ui", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<UiConfiguration> uiConfiguration() {
-    return new ResponseEntity<>(
-        ofNullable(uiConfiguration).orElse(UiConfigurationBuilder.builder().build()), HttpStatus.OK);
+    return new ResponseEntity<>(uiConfiguration, HttpStatus.OK);
   }
 
-  @RequestMapping
-  @ResponseBody
+  @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<List<SwaggerResource>> swaggerResources() {
     return new ResponseEntity<>(swaggerResources.get(), HttpStatus.OK);
   }

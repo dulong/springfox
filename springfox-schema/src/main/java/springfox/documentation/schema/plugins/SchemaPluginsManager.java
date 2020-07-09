@@ -24,8 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.plugin.core.PluginRegistry;
 import org.springframework.stereotype.Component;
-import springfox.documentation.schema.Model;
-import springfox.documentation.schema.ModelProperty;
+import springfox.documentation.schema.ModelSpecification;
+import springfox.documentation.schema.PropertySpecification;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.schema.ModelBuilderPlugin;
 import springfox.documentation.spi.schema.ModelPropertyBuilderPlugin;
@@ -40,14 +40,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static java.util.Optional.*;
-
 @Component
 public class SchemaPluginsManager {
   private final PluginRegistry<ModelPropertyBuilderPlugin, DocumentationType> propertyEnrichers;
   private final PluginRegistry<ModelBuilderPlugin, DocumentationType> modelEnrichers;
   private final PluginRegistry<ViewProviderPlugin, DocumentationType> viewProviders;
-    private final PluginRegistry<SyntheticModelProviderPlugin, ModelContext> syntheticModelProviders;
+  private final PluginRegistry<SyntheticModelProviderPlugin, ModelContext> syntheticModelProviders;
 
   @Autowired
   public SchemaPluginsManager(
@@ -65,14 +63,28 @@ public class SchemaPluginsManager {
     this.syntheticModelProviders = syntheticModelProviders;
   }
 
-  public ModelProperty property(ModelPropertyContext context) {
+  /**
+   * Use {@link SchemaPluginsManager#propertySpecification(ModelPropertyContext)} instead
+   * @deprecated @since 3.0.0
+   * @param context - property context
+   * @return the model property
+   */
+  @Deprecated
+  public springfox.documentation.schema.ModelProperty property(ModelPropertyContext context) {
     for (ModelPropertyBuilderPlugin enricher : propertyEnrichers.getPluginsFor(context.getDocumentationType())) {
       enricher.apply(context);
     }
     return context.getBuilder().build();
   }
 
-  public Model model(ModelContext context) {
+  /**
+   * Use {@link SchemaPluginsManager#modelSpecification(ModelContext)} instead
+   * @deprecated @since 3.0.0
+   * @param context - model context
+   * @return the model
+   */
+  @Deprecated
+  public springfox.documentation.schema.Model model(ModelContext context) {
     for (ModelBuilderPlugin enricher : modelEnrichers.getPluginsFor(context.getDocumentationType())) {
       enricher.apply(context);
     }
@@ -80,27 +92,62 @@ public class SchemaPluginsManager {
   }
 
   public ViewProviderPlugin viewProvider(DocumentationType documentationType) {
-    return viewProviders.getPluginFor(documentationType);
+    return viewProviders.getPluginFor(documentationType)
+        .orElseThrow(() -> new IllegalStateException("No ViewProviderPlugin for " + documentationType.getName()));
   }
 
-  public Optional<Model> syntheticModel(ModelContext context) {
-    if (syntheticModelProviders.hasPluginFor(context)) {
-      return of(syntheticModelProviders.getPluginFor(context).create(context));
-    }
-    return empty();
+  /**
+   * Use {@link SchemaPluginsManager#syntheticModelSpecification(ModelContext)} instead
+   * @deprecated @since 3.0.0
+   * @param context - model context
+   * @return the model
+   */
+  @Deprecated
+  public Optional<springfox.documentation.schema.Model> syntheticModel(ModelContext context) {
+      return syntheticModelProviders.getPluginFor(context).map(plugin -> plugin.create(context));
   }
 
-  public List<ModelProperty> syntheticProperties(ModelContext context) {
-    if (syntheticModelProviders.hasPluginFor(context)) {
-      return syntheticModelProviders.getPluginFor(context).properties(context);
+  public ModelSpecification modelSpecification(ModelContext context) {
+    for (ModelBuilderPlugin enricher : modelEnrichers.getPluginsFor(context.getDocumentationType())) {
+      enricher.apply(context);
     }
-    return new ArrayList<ModelProperty>();
+    return context.getModelSpecificationBuilder().build();
+  }
+
+  public Optional<ModelSpecification> syntheticModelSpecification(ModelContext context) {
+    return syntheticModelProviders.getPluginFor(context)
+                                  .map(p -> p.createModelSpecification(context));
+  }
+
+  /**
+   * Use {@link SchemaPluginsManager#syntheticPropertySpecifications(ModelContext)} instead
+   * @deprecated @since 3.0.0
+   * @param context - model context
+   * @return the model
+   */
+  @Deprecated
+  public List<springfox.documentation.schema.ModelProperty> syntheticProperties(ModelContext context) {
+      return syntheticModelProviders.getPluginFor(context).map(plugin -> plugin.properties(context))
+          .orElseGet(ArrayList::new);
   }
 
   public Set<ResolvedType> dependencies(ModelContext context) {
-    if (syntheticModelProviders.hasPluginFor(context)) {
-      return syntheticModelProviders.getPluginFor(context).dependencies(context);
+    return syntheticModelProviders.getPluginFor(context)
+                                  .map(plugin -> plugin.dependencies(context))
+                                  .orElseGet(HashSet::new);
+  }
+
+  public List<PropertySpecification> syntheticPropertySpecifications(ModelContext context) {
+    return syntheticModelProviders.getPluginFor(context)
+                                  .map(p -> p.propertySpecifications(context))
+                                  .orElse(new ArrayList<>());
+  }
+
+  public PropertySpecification propertySpecification(ModelPropertyContext modelPropertyContext) {
+    for (ModelPropertyBuilderPlugin enricher :
+        propertyEnrichers.getPluginsFor(modelPropertyContext.getDocumentationType())) {
+      enricher.apply(modelPropertyContext);
     }
-    return new HashSet<ResolvedType>();
+    return modelPropertyContext.getSpecificationBuilder().build();
   }
 }

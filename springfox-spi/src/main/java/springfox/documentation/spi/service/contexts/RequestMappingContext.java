@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import springfox.documentation.RequestHandler;
 import springfox.documentation.RequestHandlerKey;
 import springfox.documentation.builders.ApiDescriptionBuilder;
-import springfox.documentation.schema.Model;
 import springfox.documentation.service.Operation;
 import springfox.documentation.service.ResolvedMethodParameter;
 import springfox.documentation.spi.schema.GenericTypeNamingStrategy;
@@ -44,6 +43,7 @@ import java.util.Set;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 
+@SuppressWarnings("deprecation")
 public class RequestMappingContext {
   private final OperationModelContextsBuilder operationModelContextsBuilder;
   private final DocumentationContext documentationContext;
@@ -51,7 +51,7 @@ public class RequestMappingContext {
   private final String requestMappingPattern;
   private final ApiDescriptionBuilder apiDescriptionBuilder;
 
-  private final Map<String, Set<Model>> modelMap = new HashMap<>();
+  private final Map<String, Set<springfox.documentation.schema.Model>> modelMap = new HashMap<>();
 
   public RequestMappingContext(
       String requestMappingId,
@@ -61,12 +61,13 @@ public class RequestMappingContext {
     this.documentationContext = context;
     this.handler = handler;
     this.requestMappingPattern = "";
-    this.operationModelContextsBuilder = new OperationModelContextsBuilder(context.getGroupName(),
-                                                                           context.getDocumentationType(),
-                                                                           requestMappingId,
-                                                                           context.getAlternateTypeProvider(),
-                                                                           context.getGenericsNamingStrategy(),
-                                                                           context.getIgnorableParameterTypes());
+    this.operationModelContextsBuilder = new OperationModelContextsBuilder(
+        context.getGroupName(),
+        context.getDocumentationType(),
+        requestMappingId,
+        context.getAlternateTypeProvider(),
+        context.getGenericsNamingStrategy(),
+        context.getIgnorableParameterTypes());
     this.apiDescriptionBuilder = new ApiDescriptionBuilder(documentationContext.operationOrdering());
   }
 
@@ -88,7 +89,7 @@ public class RequestMappingContext {
       RequestHandler handler,
       OperationModelContextsBuilder operationModelContextsBuilder,
       String requestMappingPattern,
-      Map<String, Set<Model>> knownModels) {
+      Map<String, Set<springfox.documentation.schema.Model>> knownModels) {
 
     this.documentationContext = context;
     this.handler = handler;
@@ -106,7 +107,7 @@ public class RequestMappingContext {
     return requestMappingPattern;
   }
 
-  public Map<String, Set<Model>> getModelMap() {
+  public Map<String, Set<springfox.documentation.schema.Model>> getModelMap() {
     return unmodifiableMap(modelMap);
   }
 
@@ -127,18 +128,20 @@ public class RequestMappingContext {
   }
 
   public RequestMappingContext copyPatternUsing(String requestMappingPattern) {
-    return new RequestMappingContext(documentationContext,
-                                     handler,
-                                     operationModelContextsBuilder,
-                                     requestMappingPattern);
+    return new RequestMappingContext(
+        documentationContext,
+        handler,
+        operationModelContextsBuilder,
+        requestMappingPattern);
   }
 
-  public RequestMappingContext withKnownModels(Map<String, Set<Model>> knownModels) {
-    return new RequestMappingContext(documentationContext,
-                                     handler,
-                                     operationModelContextsBuilder,
-                                     requestMappingPattern,
-                                     knownModels);
+  public RequestMappingContext withKnownModels(Map<String, Set<springfox.documentation.schema.Model>> knownModels) {
+    return new RequestMappingContext(
+        documentationContext,
+        handler,
+        operationModelContextsBuilder,
+        requestMappingPattern,
+        knownModels);
   }
 
   public Set<Class> getIgnorableParameterTypes() {
@@ -168,11 +171,11 @@ public class RequestMappingContext {
     return handler.supportedMethods();
   }
 
-  public Set<? extends MediaType> produces() {
+  public Set<MediaType> produces() {
     return handler.produces();
   }
 
-  public Set<? extends MediaType> consumes() {
+  public Set<MediaType> consumes() {
     return handler.consumes();
   }
 

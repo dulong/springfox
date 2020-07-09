@@ -18,12 +18,13 @@
  */
 package springfox.documentation.spring.web.dummy;
 
-import com.fasterxml.classmate.TypeResolver;
 import org.springframework.http.HttpMethod;
+import springfox.documentation.builders.ModelSpecificationBuilder;
 import springfox.documentation.builders.OperationBuilder;
-import springfox.documentation.builders.ParameterBuilder;
-import springfox.documentation.schema.ModelRef;
+import springfox.documentation.builders.RequestParameterBuilder;
+import springfox.documentation.schema.ScalarType;
 import springfox.documentation.service.ApiDescription;
+import springfox.documentation.service.ParameterType;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.ApiListingScannerPlugin;
 import springfox.documentation.spi.service.contexts.DocumentationContext;
@@ -31,35 +32,37 @@ import springfox.documentation.spring.web.readers.operation.CachingOperationName
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class Bug2219ListingScanner implements ApiListingScannerPlugin {
 
   @Override
   public List<ApiDescription> apply(DocumentationContext context) {
-    return new ArrayList<ApiDescription>(
+    return new ArrayList<>(
         Arrays.asList(
             new ApiDescription(
                 "different-group",
                 "/bugs/2219",
+                "This is a bug summary",
                 "This is a bug-fix for 2219",
-                Arrays.asList(
+                Collections.singletonList(
                     new OperationBuilder(
                         new CachingOperationNameGenerator())
                         .authorizations(new ArrayList<>())
                         .codegenMethodNameStem("bug2219GET")
                         .method(HttpMethod.GET)
                         .notes("This is a test method")
-                        .parameters(
-                            Arrays.asList(
-                                new ParameterBuilder()
+                        .requestParameters(
+                            Collections.singletonList(
+                                new RequestParameterBuilder()
                                     .description("description of bug 2219")
-                                    .type(new TypeResolver().resolve(String.class))
                                     .name("description")
-                                    .parameterType("query")
-                                    .parameterAccess("access")
+                                    .in(ParameterType.QUERY)
                                     .required(true)
-                                    .modelRef(new ModelRef("string"))
+                                    .query(q -> new ModelSpecificationBuilder()
+                                        .scalarModel(ScalarType.STRING)
+                                        .build())
                                     .build()))
                         .build()),
                 false)));

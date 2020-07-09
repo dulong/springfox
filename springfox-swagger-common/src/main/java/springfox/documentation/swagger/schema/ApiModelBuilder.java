@@ -25,8 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import springfox.documentation.schema.ModelReference;
+import springfox.documentation.schema.ReferenceModelSpecification;
 import springfox.documentation.schema.TypeNameExtractor;
+import springfox.documentation.schema.property.ModelSpecificationFactory;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.schema.EnumTypeDeterminer;
 import springfox.documentation.spi.schema.ModelBuilderPlugin;
@@ -41,34 +42,48 @@ import static springfox.documentation.swagger.common.SwaggerPluginSupport.*;
 
 @Component
 @Order(SwaggerPluginSupport.SWAGGER_PLUGIN_ORDER)
+@SuppressWarnings("deprecation")
 public class ApiModelBuilder implements ModelBuilderPlugin {
   private final TypeResolver typeResolver;
   private final TypeNameExtractor typeNameExtractor;
   private final EnumTypeDeterminer enumTypeDeterminer;
+  private final ModelSpecificationFactory modelSpecifications;
 
   @Autowired
   public ApiModelBuilder(
       TypeResolver typeResolver,
       TypeNameExtractor typeNameExtractor,
-      EnumTypeDeterminer enumTypeDeterminer) {
+      EnumTypeDeterminer enumTypeDeterminer,
+      ModelSpecificationFactory modelSpecifications) {
     this.typeResolver = typeResolver;
     this.typeNameExtractor = typeNameExtractor;
     this.enumTypeDeterminer = enumTypeDeterminer;
+    this.modelSpecifications = modelSpecifications;
   }
 
   @Override
+  @SuppressWarnings("deprecation")
   public void apply(ModelContext context) {
     ApiModel annotation = AnnotationUtils.findAnnotation(forClass(context), ApiModel.class);
     if (annotation != null) {
-      List<ModelReference> modelRefs = new ArrayList<ModelReference>();
+      List<springfox.documentation.schema.ModelReference> modelRefs = new ArrayList<>();
+      List<ReferenceModelSpecification> subclassKeys = new ArrayList<>();
       for (Class<?> each : annotation.subTypes()) {
         modelRefs.add(modelRefFactory(context, enumTypeDeterminer, typeNameExtractor)
-            .apply(typeResolver.resolve(each)));
+                          .apply(typeResolver.resolve(each)));
+        subclassKeys.add(modelSpecifications.create(
+            context,
+            typeResolver.resolve(each)).getReference()
+                                            .orElse(null));
       }
       context.getBuilder()
-          .description(annotation.description())
-          .discriminator(annotation.discriminator())
-          .subTypes(modelRefs);
+             .description(annotation.description())
+             .discriminator(annotation.discriminator())
+             .subTypes(modelRefs);
+      context.getModelSpecificationBuilder()
+             .facets(f -> f.description(annotation.description()))
+             .compoundModel(cm -> cm.discriminator(annotation.discriminator())
+                                    .subclassReferences(subclassKeys));
     }
   }
 

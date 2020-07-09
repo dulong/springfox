@@ -22,13 +22,14 @@ package springfox.documentation.spi.service.contexts;
 
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.members.ResolvedField;
-import springfox.documentation.builders.ParameterBuilder;
+import springfox.documentation.builders.RequestParameterBuilder;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.ParameterMetadataAccessor;
 
 import java.lang.annotation.Annotation;
 import java.util.Optional;
 
+@SuppressWarnings("deprecation")
 public class ParameterExpansionContext {
 
   private final String dataTypeName;
@@ -36,7 +37,8 @@ public class ParameterExpansionContext {
   private final String parameterType;
   private final ParameterMetadataAccessor metadataAccessor;
   private final DocumentationType documentationType;
-  private final ParameterBuilder parameterBuilder;
+  private final springfox.documentation.builders.ParameterBuilder parameterBuilder;
+  private final RequestParameterBuilder requestParameterBuilder;
 
   public ParameterExpansionContext(
       String dataTypeName,
@@ -44,7 +46,8 @@ public class ParameterExpansionContext {
       String parameterType,
       ParameterMetadataAccessor metadataAccessor,
       DocumentationType documentationType,
-      ParameterBuilder parameterBuilder) {
+      springfox.documentation.builders.ParameterBuilder parameterBuilder,
+      RequestParameterBuilder requestParameterBuilder) {
 
     this.dataTypeName = dataTypeName;
     this.parentName = parentName;
@@ -52,6 +55,7 @@ public class ParameterExpansionContext {
     this.metadataAccessor = metadataAccessor;
     this.documentationType = documentationType;
     this.parameterBuilder = parameterBuilder;
+    this.requestParameterBuilder = requestParameterBuilder;
   }
 
   public String getDataTypeName() {
@@ -80,8 +84,12 @@ public class ParameterExpansionContext {
     return documentationType;
   }
 
-  public ParameterBuilder getParameterBuilder() {
+  public springfox.documentation.builders.ParameterBuilder getParameterBuilder() {
     return parameterBuilder;
+  }
+
+  public RequestParameterBuilder getRequestParameterBuilder() {
+    return requestParameterBuilder;
   }
 
   public ResolvedType getFieldType() {

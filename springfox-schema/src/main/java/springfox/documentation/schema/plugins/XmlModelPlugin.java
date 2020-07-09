@@ -34,6 +34,7 @@ import javax.xml.bind.annotation.XmlType;
 
 @Component
 @Conditional(JaxbPresentInClassPathCondition.class)
+@SuppressWarnings("deprecation")
 public class XmlModelPlugin implements ModelBuilderPlugin {
   private final TypeResolver typeResolver;
 
@@ -47,10 +48,14 @@ public class XmlModelPlugin implements ModelBuilderPlugin {
     XmlType annotation = AnnotationUtils.findAnnotation(forClass(context), XmlType.class);
     if (annotation != null) {
       context.getBuilder().xml(buildXml(annotation));
+      context.getModelSpecificationBuilder()
+          .facets(f -> f.xml(buildXml(annotation)));
     }
     XmlRootElement root = AnnotationUtils.findAnnotation(forClass(context), XmlRootElement.class);
     if (root != null) {
       context.getBuilder().xml(buildXml(root));
+      context.getModelSpecificationBuilder()
+          .facets(f -> f.xml(buildXml(root)));
     }
   }
 

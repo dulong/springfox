@@ -35,6 +35,7 @@ import springfox.documentation.spi.schema.contexts.ModelContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,6 +49,7 @@ import static springfox.documentation.schema.ResolvedTypes.*;
 
 @Component
 @Qualifier("default")
+@SuppressWarnings("deprecation")
 public class DefaultModelDependencyProvider implements ModelDependencyProvider {
 
   private static final Logger LOG = LoggerFactory.getLogger(DefaultModelDependencyProvider.class);
@@ -95,14 +97,14 @@ public class DefaultModelDependencyProvider implements ModelDependencyProvider {
   }
 
 
-  private List<ResolvedType> resolvedDependencies(ModelContext modelContext) {
-    ResolvedType resolvedType = modelContext.alternateFor(modelContext.resolvedType(typeResolver));
+  private Set<ResolvedType> resolvedDependencies(ModelContext modelContext) {
+    ResolvedType resolvedType = modelContext.alternateEvaluatedType();
     if (isBaseType(ModelContext.fromParent(modelContext, resolvedType))) {
       LOG.debug("Marking base type {} as seen", resolvedType.getSignature());
       modelContext.seen(resolvedType);
-      return new ArrayList<>();
+      return new HashSet<>();
     }
-    List<ResolvedType> dependencies = new ArrayList<>(resolvedTypeParameters(modelContext, resolvedType));
+    Set<ResolvedType> dependencies = new HashSet<>(resolvedTypeParameters(modelContext, resolvedType));
     dependencies.addAll(resolvedArrayElementType(modelContext, resolvedType));
     dependencies.addAll(resolvedMapType(modelContext, resolvedType));
     dependencies.addAll(resolvedSubclasses(modelContext, resolvedType));
@@ -110,7 +112,7 @@ public class DefaultModelDependencyProvider implements ModelDependencyProvider {
     return dependencies;
   }
 
-  private Collection<? extends ResolvedType> resolvedSubclasses(ModelContext modelContext, ResolvedType resolvedType) {
+  private Collection<ResolvedType> resolvedSubclasses(ModelContext modelContext, ResolvedType resolvedType) {
     JsonSubTypes subTypes = AnnotationUtils.findAnnotation(
         resolvedType.getErasedType(),
         JsonSubTypes.class);
@@ -126,7 +128,7 @@ public class DefaultModelDependencyProvider implements ModelDependencyProvider {
     return subclasses;
   }
 
-  private Collection<? extends ResolvedType> resolvedMapType(ModelContext modelContext, ResolvedType resolvedType) {
+  private Collection<ResolvedType> resolvedMapType(ModelContext modelContext, ResolvedType resolvedType) {
     ResolvedType mapType = resolvedType.findSupertype(Map.class);
     if (mapType == null) {
       return new ArrayList<>();
@@ -134,7 +136,7 @@ public class DefaultModelDependencyProvider implements ModelDependencyProvider {
     return resolvedTypeParameters(modelContext, mapType);
   }
 
-  private List<? extends ResolvedType> resolvedArrayElementType(ModelContext modelContext, ResolvedType resolvedType) {
+  private List<ResolvedType> resolvedArrayElementType(ModelContext modelContext, ResolvedType resolvedType) {
     List<ResolvedType> parameters = new ArrayList<>();
     if (resolvedType.isArray()) {
       ResolvedType elementType = resolvedType.getArrayElementType();
@@ -146,8 +148,8 @@ public class DefaultModelDependencyProvider implements ModelDependencyProvider {
     return parameters;
   }
 
-  private List<? extends ResolvedType> resolvedTypeParameters(ModelContext modelContext, ResolvedType resolvedType) {
-    List<ResolvedType> parameters = new ArrayList<>();
+  private Set<ResolvedType> resolvedTypeParameters(ModelContext modelContext, ResolvedType resolvedType) {
+    Set<ResolvedType> parameters = new HashSet<>();
     for (ResolvedType parameter : resolvedType.getTypeParameters()) {
       LOG.debug("Adding type for parameter {}", parameter.getSignature());
       parameters.add(modelContext.alternateFor(parameter));
@@ -157,12 +159,12 @@ public class DefaultModelDependencyProvider implements ModelDependencyProvider {
     return parameters;
   }
 
-  private List<ResolvedType> resolvedPropertiesAndFields(ModelContext modelContext, ResolvedType resolvedType) {
+  private Set<ResolvedType> resolvedPropertiesAndFields(ModelContext modelContext, ResolvedType resolvedType) {
     if (modelContext.hasSeenBefore(resolvedType) || enumTypeDeterminer.isEnum(resolvedType.getErasedType())) {
-      return new ArrayList<>();
+      return new HashSet<>();
     }
     modelContext.seen(resolvedType);
-    List<ResolvedType> properties = new ArrayList<>();
+    HashSet<ResolvedType> properties = new HashSet<>();
     for (ModelProperty property : nonTrivialProperties(modelContext, resolvedType)) {
       LOG.debug("Adding type {} for parameter {}", property.getType().getSignature(), property.getName());
       if (!isMapType(property.getType())) {
@@ -181,16 +183,12 @@ public class DefaultModelDependencyProvider implements ModelDependencyProvider {
   }
 
   private Predicate<? super ModelProperty> baseProperty(final ModelContext modelContext) {
-    return new Predicate<ModelProperty>() {
-      @Override
-      public boolean test(ModelProperty input) {
-        return isBaseType(ModelContext.fromParent(modelContext, input.getType()));
-      }
-    };
+    return input -> isBaseType(ModelContext.fromParent(modelContext, input.getType()));
   }
 
   private List<ResolvedType> maybeFromRegularType(ModelContext modelContext, ModelProperty property) {
-    if (isContainerType(property.getType()) || isMapType(property.getType())) {
+    if (isContainerType(property.getType())
+        || isMapType(property.getType())) {
       return new ArrayList<>();
     }
     LOG.debug("Recursively resolving dependencies for type {}", resolvedTypeSignature(property.getType()).orElse(
@@ -235,6 +233,4 @@ public class DefaultModelDependencyProvider implements ModelDependencyProvider {
   private List<ModelProperty> propertiesFor(ModelContext modelContext, ResolvedType resolvedType) {
     return propertiesProvider.propertiesFor(resolvedType, modelContext);
   }
-
-
 }

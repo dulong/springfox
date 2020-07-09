@@ -20,7 +20,7 @@
 package springfox.documentation.service;
 
 
-import springfox.documentation.schema.Model;
+import springfox.documentation.schema.ModelSpecification;
 
 import java.util.Comparator;
 import java.util.List;
@@ -29,6 +29,7 @@ import java.util.Set;
 
 import static java.util.stream.Collectors.*;
 
+@SuppressWarnings("deprecation")
 public class ApiListing {
   private final String apiVersion;
   private final String basePath;
@@ -39,19 +40,20 @@ public class ApiListing {
   private final Set<String> protocols;
   private final List<SecurityReference> securityReferences;
   private final List<ApiDescription> apis;
-  private final Map<String, Model> models;
-//  private Map<String, ApiResponse> responses = null;
+  private final Map<String, springfox.documentation.schema.Model> models;
+  private final Map<String, ModelSpecification> modelSpecifications;
+  private final ModelNamesRegistry modelNamesRegistry;
+  //  private Map<String, ApiResponse> responses = null;
 //  private Map<String, Parameter> parameters = null;
 //  private Map<String, Example> examples = null;
 //  private Map<String, RequestBody> requestBodies = null;
 //  private Map<String, Header> headers = null;
-//  private Map<String, SecurityScheme> securitySchemes = null;
 //  private Map<String, Link> links = null;
 //  private Map<String, Callback> callbacks = null;
   private final String description;
   private final int position;
   private final Set<Tag> tags;
-  
+
   @SuppressWarnings("ParameterNumber")
   public ApiListing(
       String apiVersion,
@@ -63,7 +65,9 @@ public class ApiListing {
       Set<String> protocols,
       List<SecurityReference> securityReferences,
       List<ApiDescription> apis,
-      Map<String, Model> models,
+      Map<String, springfox.documentation.schema.Model> models,
+      Map<String, ModelSpecification> modelSpecifications,
+      ModelNamesRegistry modelNamesRegistry,
       String description,
       int position,
       Set<Tag> tags) {
@@ -79,6 +83,8 @@ public class ApiListing {
     this.apis = apis.stream()
         .sorted(byPath()).collect(toList());
     this.models = models;
+    this.modelSpecifications = modelSpecifications;
+    this.modelNamesRegistry = modelNamesRegistry;
     this.description = description;
     this.position = position;
     this.tags = tags;
@@ -120,7 +126,7 @@ public class ApiListing {
     return apis;
   }
 
-  public Map<String, Model> getModels() {
+  public Map<String, springfox.documentation.schema.Model> getModels() {
     return models;
   }
 
@@ -140,5 +146,12 @@ public class ApiListing {
     return Comparator.comparing(ApiDescription::getPath);
   }
 
+  public Map<String, ModelSpecification> getModelSpecifications() {
+    return modelSpecifications;
+  }
+
+  public ModelNamesRegistry getModelNamesRegistry() {
+    return modelNamesRegistry;
+  }
 }
 

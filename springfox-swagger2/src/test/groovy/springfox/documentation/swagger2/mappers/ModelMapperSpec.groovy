@@ -19,16 +19,17 @@
 package springfox.documentation.swagger2.mappers
 
 import com.fasterxml.classmate.ResolvedType
+import com.fasterxml.classmate.TypeResolver
 import com.fasterxml.classmate.types.ResolvedObjectType
 import io.swagger.models.properties.AbstractNumericProperty
 import io.swagger.models.properties.ObjectProperty
 import io.swagger.models.properties.RefProperty
 import io.swagger.models.properties.StringProperty
 import org.mapstruct.factory.Mappers
+import spock.lang.Shared
 import spock.lang.Unroll
 import springfox.documentation.builders.ModelBuilder
 import springfox.documentation.builders.ModelPropertyBuilder
-import springfox.documentation.schema.AlternateTypesSupport
 import springfox.documentation.schema.CodeGenGenericTypeNamingStrategy
 import springfox.documentation.schema.Model
 import springfox.documentation.schema.ModelProperty
@@ -36,7 +37,6 @@ import springfox.documentation.schema.ModelRef
 import springfox.documentation.schema.ModelReference
 import springfox.documentation.schema.SchemaSpecification
 import springfox.documentation.schema.SimpleType
-import springfox.documentation.schema.mixins.TypesForTestingSupport
 import springfox.documentation.service.AllowableRangeValues
 import springfox.documentation.spi.DocumentationType
 
@@ -48,10 +48,10 @@ import static springfox.documentation.schema.ResolvedTypes.*
 import static springfox.documentation.spi.schema.contexts.ModelContext.*
 import static springfox.documentation.swagger2.mappers.ModelMapper.*
 
-@Mixin([TypesForTestingSupport, AlternateTypesSupport])
 class ModelMapperSpec extends SchemaSpecification {
 
-  def namingStrategy = new CodeGenGenericTypeNamingStrategy()
+  @Shared def namingStrategy = new CodeGenGenericTypeNamingStrategy()
+  @Shared def resolver = new TypeResolver()
 
   def getIds = new Function<Model, String>() {
     String apply(Model model) {
@@ -141,9 +141,9 @@ class ModelMapperSpec extends SchemaSpecification {
 
 
     then:
-    mapped.containsKey("0_0_java.util.Map<java.lang.String,java.lang.String>")
+    mapped.containsKey("java.util.Map<java.lang.String,java.lang.String>")
     and:
-    def mappedModel = mapped.get("0_0_java.util.Map<java.lang.String,java.lang.String>")
+    def mappedModel = mapped.get("java.util.Map<java.lang.String,java.lang.String>")
     mappedModel.name == "MapOfstringAndstring"
     mappedModel.additionalProperties instanceof StringProperty
   }
@@ -168,9 +168,9 @@ class ModelMapperSpec extends SchemaSpecification {
             Function.identity())))
 
     then:
-    mapped.containsKey("0_0_org.springframework.ui.ModelMap")
+    mapped.containsKey("org.springframework.ui.ModelMap")
     and:
-    def mappedModel = mapped.get("0_0_org.springframework.ui.ModelMap")
+    def mappedModel = mapped.get("org.springframework.ui.ModelMap")
     mappedModel.name == "ModelMap"
     mappedModel.additionalProperties instanceof ObjectProperty
 
@@ -196,10 +196,10 @@ class ModelMapperSpec extends SchemaSpecification {
             Function.identity())))
 
     then:
-    mapped.containsKey("0_0_java.util.Map<java.lang.String,springfox.documentation.schema.SimpleType>")
-    mapped.containsKey("0_0_springfox.documentation.schema.SimpleType")
+    mapped.containsKey("java.util.Map<java.lang.String,springfox.documentation.schema.SimpleType>")
+    mapped.containsKey("springfox.documentation.schema.SimpleType")
     and:
-    def mappedModel = mapped.get("0_0_java.util.Map<java.lang.String,springfox.documentation.schema.SimpleType>")
+    def mappedModel = mapped.get("java.util.Map<java.lang.String,springfox.documentation.schema.SimpleType>")
     mappedModel.name == "MapOfstringAndSimpleType"
     mappedModel.additionalProperties instanceof RefProperty
 

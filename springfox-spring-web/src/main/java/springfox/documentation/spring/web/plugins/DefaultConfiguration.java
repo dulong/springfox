@@ -42,6 +42,7 @@ public class DefaultConfiguration implements DefaultsProviderPlugin {
     this.pathProvider = pathProvider;
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public DocumentationContextBuilder create(DocumentationType documentationType) {
     return new DocumentationContextBuilder(documentationType)
@@ -51,6 +52,7 @@ public class DefaultConfiguration implements DefaultsProviderPlugin {
         .additionalIgnorableTypes(defaults.defaultIgnorableParameterTypes())
         .rules(defaults.defaultRules(typeResolver))
         .defaultResponseMessages(defaults.defaultResponseMessages())
+        .defaultResponses(defaults.defaultResponses())
         .pathProvider(pathProvider)
         .typeResolver(typeResolver)
         .enableUrlTemplating(false)

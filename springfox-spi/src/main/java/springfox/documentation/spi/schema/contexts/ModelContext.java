@@ -20,19 +20,18 @@ package springfox.documentation.spi.schema.contexts;
 
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.TypeResolver;
-import springfox.documentation.builders.ModelBuilder;
+import springfox.documentation.builders.ModelSpecificationBuilder;
+import springfox.documentation.schema.ModelKeyBuilder;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.schema.AlternateTypeProvider;
 import springfox.documentation.spi.schema.GenericTypeNamingStrategy;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-
+@SuppressWarnings("deprecation")
 public class ModelContext {
   private final String parameterId;
   private final ResolvedType type;
@@ -45,11 +44,12 @@ public class ModelContext {
 
   private final ModelContext parentContext;
   private final Set<ResolvedType> seenTypes = new HashSet<>();
-  private final ModelBuilder modelBuilder;
+  private final springfox.documentation.builders.ModelBuilder modelBuilder;
+  private final ModelSpecificationBuilder modelSpecificationBuilder;
+  private final ModelKeyBuilder effectiveModelKeyBuilder = new ModelKeyBuilder();
   private final AlternateTypeProvider alternateTypeProvider;
   private final GenericTypeNamingStrategy genericNamingStrategy;
   private final Set<Class> ignorableTypes;
-  private final Map<ResolvedType, String> registeredTypes;
 
   @SuppressWarnings("ParameterNumber")
   private ModelContext(
@@ -69,17 +69,15 @@ public class ModelContext {
     this.alternateTypeProvider = alternateTypeProvider;
     this.genericNamingStrategy = genericNamingStrategy;
     this.ignorableTypes = ignorableTypes;
-    this.registeredTypes = new HashMap<>();
     this.parentContext = null;
     this.type = type;
     this.returnType = returnType;
     this.view = view;
     this.validationGroups = new HashSet<>(validationGroups);
-    this.modelBuilder =
-        new ModelBuilder(String.format(
-            "%s_%s",
-            parameterId,
-            type.getBriefDescription()));
+    this.modelBuilder = new springfox.documentation.builders.ModelBuilder(getModelId());
+    this.modelSpecificationBuilder = new ModelSpecificationBuilder();
+    this.getEffectiveModelKeyBuilder()
+        .isResponse(isReturnType());
   }
 
   @SuppressWarnings("ParameterNumber")
@@ -96,13 +94,11 @@ public class ModelContext {
     this.documentationType = parentContext.getDocumentationType();
     this.alternateTypeProvider = parentContext.alternateTypeProvider;
     this.ignorableTypes = parentContext.ignorableTypes;
-    this.registeredTypes = parentContext.registeredTypes;
     this.genericNamingStrategy = parentContext.getGenericNamingStrategy();
-    this.modelBuilder =
-        new ModelBuilder(String.format(
-            "%s_%s",
-            parameterId,
-            input.getBriefDescription()));
+    this.modelBuilder = new springfox.documentation.builders.ModelBuilder(getModelId());
+    this.modelSpecificationBuilder = new ModelSpecificationBuilder();
+    this.getEffectiveModelKeyBuilder()
+        .isResponse(isReturnType());
   }
 
   /**
@@ -120,13 +116,20 @@ public class ModelContext {
   }
 
   /**
-   * @return type id behind this context
+   * @return type id of model behind this context
+   */
+  public String getModelId() {
+    return type.getBriefDescription();
+  }
+
+  /**
+   * @return type id of type behind this context
    */
   public String getTypeId() {
-    return String.format(
-        "%s_%s",
-        parameterId,
-        type.getBriefDescription());
+    return new StringBuilder(parameterId)
+        .append("_")
+        .append(getModelId()).
+            toString();
   }
 
   /**
@@ -174,17 +177,28 @@ public class ModelContext {
   }
 
   /**
+   * @return alternate type for given resolved type
+   */
+  public ResolvedType alternateEvaluatedType() {
+    return alternateTypeProvider.alternateFor(getType());
+  }
+
+  /**
    * @return group name of the docket
    */
   public String getGroupName() {
     return groupName;
   }
 
+
   /**
    * Convenience method to provide an new context for an input parameter
    *
+   * @param parameterId           - parameter id
    * @param group                 - group name of the docket
    * @param type                  - type
+   * @param view                  - view
+   * @param validationGroups      - validation groups
    * @param documentationType     - for documentation type
    * @param alternateTypeProvider - alternate type provider
    * @param genericNamingStrategy - how generic types should be named
@@ -219,8 +233,10 @@ public class ModelContext {
   /**
    * Convenience method to provide an new context for an return parameter
    *
+   * @param parameterId           - parameter id
    * @param groupName             - group name of the docket
    * @param type                  - type
+   * @param view                  - view
    * @param documentationType     - for documentation type
    * @param alternateTypeProvider - alternate type provider
    * @param genericNamingStrategy - how generic types should be named
@@ -302,8 +318,22 @@ public class ModelContext {
     return parentContext.getGenericNamingStrategy();
   }
 
-  public ModelBuilder getBuilder() {
+  /**
+   * Use {@link ModelContext#getModelSpecificationBuilder} instead
+   * @deprecated @since 3.0.0
+   * @return ModelBuilder
+   */
+  @Deprecated
+  public springfox.documentation.builders.ModelBuilder getBuilder() {
     return modelBuilder;
+  }
+
+  public ModelSpecificationBuilder getModelSpecificationBuilder() {
+    return modelSpecificationBuilder;
+  }
+
+  public ModelKeyBuilder getEffectiveModelKeyBuilder() {
+    return effectiveModelKeyBuilder;
   }
 
   public void seen(ResolvedType resolvedType) {
@@ -324,14 +354,13 @@ public class ModelContext {
     ModelContext that = (ModelContext) o;
 
     return
-        Objects.equals(parameterId, that.parameterId)
-            && Objects.equals(groupName, that.groupName)
-            && Objects.equals(type, that.type)
-            && Objects.equals(view, that.view)
-            && Objects.equals(validationGroups, that.validationGroups)
-            && Objects.equals(documentationType, that.documentationType)
-            && Objects.equals(returnType, that.returnType)
-            && Objects.equals(namingStrategy(), that.namingStrategy());
+    Objects.equals(groupName, that.groupName)
+        && Objects.equals(type, that.type)
+        && Objects.equals(view, that.view)
+        && Objects.equals(validationGroups, that.validationGroups)
+        && Objects.equals(documentationType, that.documentationType)
+        && Objects.equals(returnType, that.returnType)
+        && Objects.equals(namingStrategy(), that.namingStrategy());
   }
 
   private String namingStrategy() {
@@ -344,7 +373,6 @@ public class ModelContext {
   @Override
   public int hashCode() {
     return Objects.hash(
-        parameterId,
         groupName,
         type,
         view,
@@ -359,12 +387,26 @@ public class ModelContext {
         .append("{")
         .append("groupName=").append(this.getGroupName()).append(", ")
         .append("type=").append(this.getType()).append(", ")
-        .append("isReturnType=").append(this.isReturnType())
+        .append("isReturnType=").append(this.isReturnType()).append(", ")
         .append("view=").append(this.getView())
         .append("}").toString();
   }
 
   public boolean canIgnore(ResolvedType type) {
     return ignorableTypes.contains(type.getErasedType());
+  }
+
+  public ModelContext copy() {
+    return new ModelContext(
+        this.parameterId,
+        this.groupName,
+        this.type,
+        this.returnType,
+        this.view,
+        this.validationGroups,
+        this.documentationType,
+        this.alternateTypeProvider,
+        this.genericNamingStrategy,
+        this.ignorableTypes);
   }
 }

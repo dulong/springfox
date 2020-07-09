@@ -48,10 +48,12 @@ public class NotNullAnnotationPlugin implements ModelPropertyBuilderPlugin {
    * read NotNull annotation
    */
   @Override
+  @SuppressWarnings("deprecation")
   public void apply(ModelPropertyContext context) {
     Optional<NotNull> notNull = extractAnnotation(context);
     if (notNull.isPresent()) {
-      context.getBuilder().required(notNull.isPresent());
+      context.getBuilder().required(true);
+      context.getSpecificationBuilder().required(true);
     }
   }
 

@@ -62,47 +62,32 @@ public class OperationModelContextsBuilder {
   }
 
   public ModelContext addReturn(ResolvedType type) {
-    return addReturn(
-        type,
-        Optional.empty());
+    return addReturn(type, Optional.empty());
   }
 
-  public ModelContext addReturn(
-      ResolvedType type,
-      Optional<ResolvedType> view) {
-    Optional<ModelContext> context =
-        contexts.stream()
-            .filter(ctx -> ctx.getType().equals(type)
-                && ctx.getView().equals(view)
-                && ctx.getValidationGroups().equals(new HashSet<ResolvedType>())
-                && ctx.isReturnType()).findFirst();
-
-    if (context.isPresent()) {
-      return context.get();
-    } else {
-      ModelContext returnValue = ModelContext.returnValue(
-          String.format(
-              "%s_%s",
-              requestMappingId,
-              parameterIndex),
-          group,
-          type,
-          view,
-          documentationType,
-          alternateTypeProvider,
-          genericsNamingStrategy,
-          ignorableTypes);
-      this.contexts.add(returnValue);
+  public ModelContext addReturn(ResolvedType type, Optional<ResolvedType> view) {
+    ModelContext returnValue = ModelContext.returnValue(
+        String.format("%s_%s", requestMappingId, parameterIndex),
+        group,
+        type,
+        view,
+        documentationType,
+        alternateTypeProvider,
+        genericsNamingStrategy,
+        ignorableTypes);
+    if (this.contexts.add(returnValue)) {
       ++parameterIndex;
       return returnValue;
     }
+
+    return contexts.stream()
+        .filter(context -> context.equals(returnValue))
+        .findFirst()
+        .orElseThrow(() -> new IllegalStateException("Expecting at least one matching model context"));
   }
 
   public ModelContext addInputParam(ResolvedType type) {
-    return addInputParam(
-        type,
-        Optional.empty(),
-        new HashSet<>());
+    return addInputParam(type, Optional.empty(), new HashSet<>());
   }
 
   public ModelContext addInputParam(
@@ -110,48 +95,34 @@ public class OperationModelContextsBuilder {
       Optional<ResolvedType> view,
       Set<ResolvedType> validationGroups) {
     validationGroups = new HashSet<>(validationGroups);
-    Set<ResolvedType> finalValidationGroups = validationGroups;
-    Optional<ModelContext> context =
-        contexts.stream()
-            .filter(ctx -> ctx.getType().equals(type) &&
-                ctx.getView().equals(view)
-                && ctx.getValidationGroups().equals(finalValidationGroups)
-                && !ctx.isReturnType())
-            .findFirst();
-
-    if (context.isPresent()) {
-      return context.get();
-    } else {
-      ModelContext inputParam = ModelContext.inputParam(
-          String.format(
-              "%s_%s",
-              requestMappingId,
-              parameterIndex),
-          group,
-          type,
-          view,
-          validationGroups,
-          documentationType,
-          alternateTypeProvider,
-          genericsNamingStrategy,
-          ignorableTypes);
-      this.contexts.add(inputParam);
+    ModelContext inputParam = ModelContext.inputParam(
+        String.format("%s_%s", requestMappingId, parameterIndex),
+        group,
+        type,
+        view,
+        validationGroups,
+        documentationType,
+        alternateTypeProvider,
+        genericsNamingStrategy,
+        ignorableTypes);
+    if (this.contexts.add(inputParam)) {
       ++parameterIndex;
       return inputParam;
     }
+
+    return contexts.stream()
+        .filter(context -> context.equals(inputParam))
+        .findFirst()
+        .orElseThrow(() -> new IllegalStateException("Expecting at least one matching model context"));
   }
 
   public Set<ModelContext> build() {
-    Comparator<ModelContext> byParameterId =
-        Comparator.comparing(ModelContext::getParameterId);
+    Comparator<ModelContext> byParameterId = Comparator.comparing(ModelContext::getParameterId);
 
-    Supplier<TreeSet<ModelContext>> supplier =
-        () -> new TreeSet<>(byParameterId);
+    Supplier<TreeSet<ModelContext>> supplier = () -> new TreeSet<>(byParameterId);
 
     return contexts.stream()
-        .collect(
-            collectingAndThen(
-                Collectors.toCollection(supplier),
-                Collections::unmodifiableSet));
+        .map(ModelContext::copy)
+        .collect(collectingAndThen(Collectors.toCollection(supplier), Collections::unmodifiableSet));
   }
 }

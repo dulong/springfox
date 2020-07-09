@@ -35,6 +35,7 @@ import static springfox.documentation.spring.web.readers.parameter.ParameterType
 
 @Component("swagger1ParameterNameReader")
 @Order(SwaggerPluginSupport.SWAGGER_PLUGIN_ORDER)
+@SuppressWarnings("deprecation")
 public class ParameterNameReader implements ParameterBuilderPlugin {
 
   @Override
@@ -46,6 +47,7 @@ public class ParameterNameReader implements ParameterBuilderPlugin {
       name = ofNullable(apiParam.get().name()).filter(((Predicate<String>) String::isEmpty).negate()).orElse(null);
     }
     context.parameterBuilder().name(maybeOverrideName(name, paramType));
+    context.requestParameterBuilder().name(maybeOverrideName(name, paramType));
   }
 
   private String maybeOverrideName(String parameterName, String paramType) {

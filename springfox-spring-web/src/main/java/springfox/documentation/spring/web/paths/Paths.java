@@ -19,7 +19,6 @@
 
 package springfox.documentation.spring.web.paths;
 
-import javax.servlet.ServletContext;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,7 +33,9 @@ public class Paths {
     throw new UnsupportedOperationException();
   }
 
-  public static String splitCamelCase(String s, String separator) {
+  public static String splitCamelCase(
+      String s,
+      String separator) {
     if (isEmpty(s)) {
       return "";
     }
@@ -88,6 +89,7 @@ public class Paths {
    * @param requestMappingPattern request mapping pattern
    * @return the request mapping endpoint
    */
+  @SuppressWarnings("java:S4784")
   public static String sanitizeRequestMappingPattern(String requestMappingPattern) {
     String result = requestMappingPattern;
     //remove regex portion '/{businessId:\\w+}'
@@ -99,9 +101,8 @@ public class Paths {
     return candidate.replaceAll("(?<!(http:|https:))//", "/");
   }
 
-  public static String contextPath(ServletContext context) {
-    String path = context.getContextPath();
-    return rootPathWhenEmpty(path);
+  public static String contextPath(String contextPath) {
+    return rootPathWhenEmpty(contextPath);
   }
 
   public static String rootPathWhenEmpty(String path) {

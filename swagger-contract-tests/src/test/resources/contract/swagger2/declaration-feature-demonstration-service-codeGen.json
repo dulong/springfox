@@ -22,8 +22,8 @@
         }
     ],
     "produces": [
-        "application/xml",
-        "application/json"
+        "application/json",
+        "application/xml"
     ],
     "paths": {
         "/features/1367/{itemId}": {
@@ -32,10 +32,10 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "findById",
-                "operationId": "findByIdUsingGET_2",
+                "operationId": "findByIdUsingGET_1",
                 "produces": [
-                    "application/vnd.com.pet+json",
-                    "application/vnd.com.fancy-pet+json"
+                    "application/vnd.com.fancy-pet+json",
+                    "application/vnd.com.pet+json"
                 ],
                 "parameters": [
                     {
@@ -53,8 +53,7 @@
                             "$ref": "#/definitions/FancyPet"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/1430-body": {
@@ -63,7 +62,7 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "base64EncodedBody",
-                "operationId": "base64EncodedBodyUsingPOST_2",
+                "operationId": "base64EncodedBodyUsingPOST_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -83,8 +82,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/1430-query": {
@@ -93,7 +91,7 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "proper",
-                "operationId": "properUsingPOST_2",
+                "operationId": "properUsingPOST_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -111,8 +109,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/1490/entity/{itemId}": {
@@ -121,7 +118,7 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "serializablePetEntity",
-                "operationId": "serializablePetEntityUsingGET_2",
+                "operationId": "serializablePetEntityUsingGET_1",
                 "parameters": [
                     {
                         "name": "itemId",
@@ -135,11 +132,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Pet"
+                            "$ref": "#/definitions/PetWithSerializer"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/1490/{itemId}": {
@@ -148,7 +144,7 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "serializablePet",
-                "operationId": "serializablePetUsingGET_2",
+                "operationId": "serializablePetUsingGET_1",
                 "parameters": [
                     {
                         "name": "itemId",
@@ -162,18 +158,17 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Pet"
+                            "$ref": "#/definitions/PetWithSerializer"
                         }
                     }
-                },
-                "deprecated": false
+                }
             },
             "put": {
                 "tags": [
                     "feature-demonstration-service"
                 ],
                 "summary": "updateSerializablePet",
-                "operationId": "updateSerializablePetUsingPUT_2",
+                "operationId": "updateSerializablePetUsingPUT_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -191,7 +186,7 @@
                         "description": "pet",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/Pet"
+                            "$ref": "#/definitions/PetWithSerializer"
                         }
                     }
                 ],
@@ -199,17 +194,19 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/1570": {
             "post": {
+                "tags": [
+                    "feature-demonstration-service"
+                ],
+                "summary": "Demo using examples",
+                "operationId": "saveUserUsingPOST_1",
                 "consumes": [
                     "application/json"
                 ],
-                "deprecated": false,
-                "operationId": "saveUserUsingPOST_2",
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -220,15 +217,11 @@
                     "405": {
                         "description": "Validation exception",
                         "examples": {
-                            "Example json": "{\"invalidField\": \"address\"}",
+                            "Example json": "{'invalidField': 'address'}",
                             "Example string": "The first name was invalid"
                         }
                     }
-                },
-                "summary": "Demo using examples",
-                "tags": [
-                    "feature-demonstration-service"
-                ]
+                }
             }
         },
         "/features/2031": {
@@ -245,7 +238,8 @@
                     {
                         "in": "body",
                         "name": "contents",
-                        "required": false,
+                        "description": "contents",
+                        "required": true,
                         "schema": {
                             "$ref": "#/definitions/CustomTypeFor2031"
                         },
@@ -272,8 +266,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/addFiles": {
@@ -282,29 +275,38 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "Add a new contact with file attachment",
-                "operationId": "addFilesUsingPOST_2",
+                "operationId": "addFilesUsingPOST_1",
                 "consumes": [
                     "application/json"
                 ],
                 "parameters": [
                     {
-                        "name": "files",
                         "in": "formData",
-                        "description": "files",
-                        "required": true,
-                        "type": "array",
-                        "items": {
-                            "type": "file"
-                        },
-                        "collectionFormat": "multi"
+                        "name": "body",
+                        "required": false,
+                        "schema": {
+                            "type": "object",
+                            "required": [
+                                "files"
+                            ],
+                            "properties": {
+                                "files": {
+                                    "type": "array",
+                                    "description": "files",
+                                    "items": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                }
+                            }
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/allMethodsAllowed": {
@@ -313,20 +315,19 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "allMethodAllowed",
-                "operationId": "allMethodAllowedUsingGET_2",
+                "operationId": "allMethodAllowedUsingGET_1",
                 "responses": {
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             },
             "head": {
                 "tags": [
                     "feature-demonstration-service"
                 ],
                 "summary": "allMethodAllowed",
-                "operationId": "allMethodAllowedUsingHEAD_2",
+                "operationId": "allMethodAllowedUsingHEAD_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -334,15 +335,14 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             },
             "post": {
                 "tags": [
                     "feature-demonstration-service"
                 ],
                 "summary": "allMethodAllowed",
-                "operationId": "allMethodAllowedUsingPOST_2",
+                "operationId": "allMethodAllowedUsingPOST_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -350,15 +350,14 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             },
             "put": {
                 "tags": [
                     "feature-demonstration-service"
                 ],
                 "summary": "allMethodAllowed",
-                "operationId": "allMethodAllowedUsingPUT_2",
+                "operationId": "allMethodAllowedUsingPUT_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -366,28 +365,26 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             },
             "delete": {
                 "tags": [
                     "feature-demonstration-service"
                 ],
                 "summary": "allMethodAllowed",
-                "operationId": "allMethodAllowedUsingDELETE_2",
+                "operationId": "allMethodAllowedUsingDELETE_1",
                 "responses": {
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             },
             "options": {
                 "tags": [
                     "feature-demonstration-service"
                 ],
                 "summary": "allMethodAllowed",
-                "operationId": "allMethodAllowedUsingOPTIONS_2",
+                "operationId": "allMethodAllowedUsingOPTIONS_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -395,15 +392,14 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             },
             "patch": {
                 "tags": [
                     "feature-demonstration-service"
                 ],
                 "summary": "allMethodAllowed",
-                "operationId": "allMethodAllowedUsingPATCH_2",
+                "operationId": "allMethodAllowedUsingPATCH_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -411,8 +407,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/arrayOfArrays": {
@@ -460,8 +455,7 @@
                             }
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/bare": {
@@ -470,7 +464,7 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "getBare",
-                "operationId": "getBareUsingPOST_2",
+                "operationId": "getBareUsingPOST_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -484,7 +478,7 @@
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "multi"
+                        "collectionFormat": "csv"
                     },
                     {
                         "name": "annotatedEnumType",
@@ -523,8 +517,8 @@
                         "required": true,
                         "type": "string",
                         "enum": [
-                            "man",
-                            "chu"
+                            "chu",
+                            "man"
                         ]
                     },
                     {
@@ -565,8 +559,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/bigDecimal": {
@@ -575,7 +568,7 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "updateBigDecimal",
-                "operationId": "updateBigDecimalUsingPOST_2",
+                "operationId": "updateBigDecimalUsingPOST_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -585,15 +578,15 @@
                         "in": "query",
                         "description": "input",
                         "required": false,
-                        "type": "number"
+                        "type": "number",
+                        "format": "bigdecimal"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/boolean": {
@@ -602,7 +595,7 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "updateBoolean",
-                "operationId": "updateBooleanUsingPOST_2",
+                "operationId": "updateBooleanUsingPOST_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -619,8 +612,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/date": {
@@ -629,7 +621,7 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "updateDate",
-                "operationId": "updateDateUsingPOST_2",
+                "operationId": "updateDateUsingPOST_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -647,8 +639,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/effective": {
@@ -657,7 +648,7 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "getEffective",
-                "operationId": "getEffectiveUsingGET_2",
+                "operationId": "getEffectiveUsingGET_1",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -665,8 +656,7 @@
                             "$ref": "#/definitions/Example"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/effectives": {
@@ -675,7 +665,7 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "getEffectives",
-                "operationId": "getEffectivesUsingGET_2",
+                "operationId": "getEffectivesUsingGET_1",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -686,8 +676,7 @@
                             }
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/enumObject": {
@@ -696,7 +685,7 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "getEnumAsObject",
-                "operationId": "getEnumAsObjectUsingGET_2",
+                "operationId": "getEnumAsObjectUsingGET_1",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -704,8 +693,7 @@
                             "$ref": "#/definitions/EnumObjectType"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/examples": {
@@ -714,7 +702,7 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "updateListOfExamples",
-                "operationId": "updateListOfExamplesUsingPUT_2",
+                "operationId": "updateListOfExamplesUsingPUT_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -726,17 +714,16 @@
                         "required": false,
                         "type": "array",
                         "items": {
-                            "$ref": "#/definitions/Example"
+                            "$ref": "#/definitions/Error-ModelName{namespace='springfox.test.contract.swagger.models', name='Example'}"
                         },
-                        "collectionFormat": "multi"
+                        "collectionFormat": "csv"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/inheritance": {
@@ -745,7 +732,7 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "findVehicles",
-                "operationId": "findVehiclesUsingGET_2",
+                "operationId": "findVehiclesUsingGET_1",
                 "parameters": [
                     {
                         "name": "type",
@@ -765,8 +752,7 @@
                             }
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/integers": {
@@ -775,7 +761,7 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "updateListOfIntegers",
-                "operationId": "updateListOfIntegersUsingPUT_2",
+                "operationId": "updateListOfIntegersUsingPUT_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -790,15 +776,14 @@
                             "type": "integer",
                             "format": "int32"
                         },
-                        "collectionFormat": "multi"
+                        "collectionFormat": "csv"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/listOfMaps": {
@@ -807,19 +792,21 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "listOfMaps",
-                "operationId": "listOfMapsUsingGET_2",
+                "operationId": "listOfMapsUsingGET_1",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/MapOfstringAndstring"
+                                "type": "object",
+                                "additionalProperties": {
+                                    "type": "string"
+                                }
                             }
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/mapOfMapOfExample": {
@@ -828,7 +815,7 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "mapOfMapOfExample",
-                "operationId": "mapOfMapOfExampleUsingGET_2",
+                "operationId": "mapOfMapOfExampleUsingGET_1",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -842,8 +829,7 @@
                             }
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/mapProperty": {
@@ -852,7 +838,7 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "modelWithMapProperty",
-                "operationId": "modelWithMapPropertyUsingGET_2",
+                "operationId": "modelWithMapPropertyUsingGET_1",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -860,8 +846,7 @@
                             "$ref": "#/definitions/ModelWithMapProperty"
                         }
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/modelAttributes": {
@@ -870,7 +855,7 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "getModelAttribute",
-                "operationId": "getModelAttributeUsingGET_2",
+                "operationId": "getModelAttributeUsingGET_1",
                 "parameters": [
                     {
                         "name": "accountTypes",
@@ -880,14 +865,14 @@
                         "items": {
                             "type": "string",
                             "enum": [
-                                "CASH",
-                                "BANK"
+                                "BANK",
+                                "CASH"
                             ]
                         },
-                        "collectionFormat": "multi",
+                        "collectionFormat": "csv",
                         "enum": [
-                            "CASH",
-                            "BANK"
+                            "BANK",
+                            "CASH"
                         ]
                     },
                     {
@@ -899,7 +884,7 @@
                             "type": "integer",
                             "format": "int32"
                         },
-                        "collectionFormat": "multi"
+                        "collectionFormat": "csv"
                     },
                     {
                         "name": "complexProp.name",
@@ -922,7 +907,7 @@
                         "items": {
                             "type": "string"
                         },
-                        "collectionFormat": "multi"
+                        "collectionFormat": "csv"
                     },
                     {
                         "name": "stringProp",
@@ -935,8 +920,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/propertyWithArrayOfArrays": {
@@ -964,8 +948,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/propertyWithObjectNode": {
@@ -974,7 +957,7 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "propertyWithObjectNode",
-                "operationId": "propertyWithObjectNodeUsingPOST_2",
+                "operationId": "propertyWithObjectNodeUsingPOST_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -993,8 +976,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/status": {
@@ -1003,7 +985,7 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "updateBaz",
-                "operationId": "updateBazUsingPOST_2",
+                "operationId": "updateBazUsingPOST_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -1024,8 +1006,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/statuses": {
@@ -1034,7 +1015,7 @@
                     "feature-demonstration-service"
                 ],
                 "summary": "updateBazes",
-                "operationId": "updateBazesUsingPOST_2",
+                "operationId": "updateBazesUsingPOST_1",
                 "consumes": [
                     "application/json"
                 ],
@@ -1052,7 +1033,7 @@
                                 "TWO"
                             ]
                         },
-                        "collectionFormat": "multi",
+                        "collectionFormat": "csv",
                         "enum": [
                             "ONE",
                             "TWO"
@@ -1063,8 +1044,7 @@
                     "200": {
                         "description": "OK"
                     }
-                },
-                "deprecated": false
+                }
             }
         },
         "/features/{petId}": {
@@ -1074,7 +1054,7 @@
                 ],
                 "summary": "Find pet by ID",
                 "description": "Returns a pet when ID < 10. ID > 10 or non-integers will simulate API error conditions",
-                "operationId": "getPetByIdUsingGET_3",
+                "operationId": "getPetByIdUsingGET_1",
                 "parameters": [
                     {
                         "name": "petId",
@@ -1095,7 +1075,6 @@
                         }
                     }
                 },
-                "deprecated": false,
                 "x-test1": "value1",
                 "x-test2": {
                     "name2": "value2"
@@ -1183,6 +1162,7 @@
             "properties": {
                 "allCapsSet": {
                     "type": "array",
+                    "uniqueItems": true,
                     "items": {
                         "type": "string"
                     }
@@ -1256,20 +1236,6 @@
             },
             "title": "FancyPet"
         },
-        "MapOfstringAndExample": {
-            "type": "object",
-            "title": "MapOfstringAndExample",
-            "additionalProperties": {
-                "$ref": "#/definitions/Example"
-            }
-        },
-        "MapOfstringAndstring": {
-            "type": "object",
-            "title": "MapOfstringAndstring",
-            "additionalProperties": {
-                "type": "string"
-            }
-        },
         "ModelWithArrayOfArrays": {
             "type": "object",
             "properties": {
@@ -1288,7 +1254,6 @@
         },
         "ModelWithMapProperty": {
             "type": "object",
-            "discriminator": "Describes model with map property",
             "properties": {
                 "params": {
                     "type": "object",
@@ -1339,6 +1304,10 @@
             },
             "title": "Pet"
         },
+        "PetWithSerializer": {
+            "type": "object",
+            "title": "PetWithSerializer"
+        },
         "Truck": {
             "title": "Truck",
             "allOf": [
@@ -1365,6 +1334,7 @@
         },
         "Vehicle": {
             "type": "object",
+            "discriminator": "type",
             "properties": {
                 "make": {
                     "type": "string"

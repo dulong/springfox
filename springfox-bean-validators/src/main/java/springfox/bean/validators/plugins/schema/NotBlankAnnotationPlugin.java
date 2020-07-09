@@ -49,10 +49,12 @@ public class NotBlankAnnotationPlugin implements ModelPropertyBuilderPlugin {
    * read NotBlank annotation
    */
   @Override
+  @SuppressWarnings("deprecation")
   public void apply(ModelPropertyContext context) {
     Optional<NotBlank> notBlank = extractAnnotation(context);
     if (notBlank.isPresent()) {
       context.getBuilder().required(true);
+      context.getSpecificationBuilder().required(true);
     }
   }
 

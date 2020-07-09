@@ -19,7 +19,6 @@
 
 package springfox.documentation.builders;
 
-import springfox.documentation.service.Parameter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,22 +26,31 @@ import java.util.Optional;
 import java.util.Set;
 
 import static java.util.stream.Collectors.*;
-import static springfox.documentation.builders.Parameters.*;
 
+/**
+ * Scheduled to be removed in the next release
+ * @deprecated
+ * @since 3.0
+ */
+@Deprecated
 class ParameterMerger {
 
-  private final List<Parameter> destination;
-  private final List<Parameter> source;
+  private final List<springfox.documentation.service.Parameter> destination;
+  private final List<springfox.documentation.service.Parameter> source;
 
-  ParameterMerger(List<Parameter> destination, List<Parameter> source) {
+  ParameterMerger(
+      List<springfox.documentation.service.Parameter> destination,
+      List<springfox.documentation.service.Parameter> source) {
     this.destination = new ArrayList<>(destination);
     this.source = new ArrayList<>(source);
   }
 
-  public List<Parameter> merged() {
-    Set<String> existingParameterNames = destination.stream().map(toParameterName()).collect(toSet());
-    Set<String> newParameterNames = source.stream().map(toParameterName()).collect(toSet());
-    List<Parameter> merged = new ArrayList<>();
+  public List<springfox.documentation.service.Parameter> merged() {
+    Set<String> existingParameterNames = destination.stream()
+        .map(springfox.documentation.service.Parameter::getName).collect(toSet());
+    Set<String> newParameterNames = source.stream()
+        .map(springfox.documentation.service.Parameter::getName).collect(toSet());
+    List<springfox.documentation.service.Parameter> merged = new ArrayList<>();
 
     Set<String> asIsParams = existingParameterNames.stream()
         .filter(entry -> !newParameterNames.contains(entry)).collect(toSet());
@@ -57,9 +65,11 @@ class ParameterMerger {
     return merged;
   }
 
-  private List<Parameter> asIsParameters(Set<String> asIsParams, List<Parameter> source) {
-    List<Parameter> parameters = new ArrayList<>();
-    for (Parameter each : source) {
+  private List<springfox.documentation.service.Parameter> asIsParameters(
+      Set<String> asIsParams,
+      List<springfox.documentation.service.Parameter> source) {
+    List<springfox.documentation.service.Parameter> parameters = new ArrayList<>();
+    for (springfox.documentation.service.Parameter each : source) {
       if (asIsParams.contains(each.getName())) {
         parameters.add(each);
       }
@@ -67,13 +77,14 @@ class ParameterMerger {
     return parameters;
   }
 
-  private List<Parameter> mergedParameters(
+  private List<springfox.documentation.service.Parameter> mergedParameters(
       Set<String> paramsToMerge,
-      List<Parameter> existingParameters,
-      List<Parameter> newParams) {
-    List<Parameter> parameters = new ArrayList<>();
-    for (Parameter newParam : newParams) {
-      Optional<Parameter> original = existingParameters.stream().filter(withName(newParam.getName())).findFirst();
+      List<springfox.documentation.service.Parameter> existingParameters,
+      List<springfox.documentation.service.Parameter> newParams) {
+    List<springfox.documentation.service.Parameter> parameters = new ArrayList<>();
+    for (springfox.documentation.service.Parameter newParam : newParams) {
+      Optional<springfox.documentation.service.Parameter> original = existingParameters.stream()
+          .filter(input -> newParam.getName().equals(input.getName())).findFirst();
       if (paramsToMerge.contains(newParam.getName()) && original.isPresent()) {
         if (newParam.getOrder() > original.get().getOrder()) {
           parameters.add(merged(newParam, original.get()));
@@ -85,7 +96,9 @@ class ParameterMerger {
     return parameters;
   }
 
-  private Parameter merged(Parameter destination, Parameter source) {
+  private springfox.documentation.service.Parameter merged(
+      springfox.documentation.service.Parameter destination,
+      springfox.documentation.service.Parameter source) {
     return new ParameterBuilder()
         .from(destination)
         .name(source.getName())
@@ -105,9 +118,11 @@ class ParameterMerger {
         .build();
   }
 
-  private List<Parameter> newParameters(Set<String> missingParamNames, List<Parameter> newParams) {
-    List<Parameter> parameters = new ArrayList<>();
-    for (Parameter each : newParams) {
+  private List<springfox.documentation.service.Parameter> newParameters(
+      Set<String> missingParamNames,
+      List<springfox.documentation.service.Parameter> newParams) {
+    List<springfox.documentation.service.Parameter> parameters = new ArrayList<>();
+    for (springfox.documentation.service.Parameter each : newParams) {
       if (missingParamNames.contains(each.getName())) {
         parameters.add(each);
       }

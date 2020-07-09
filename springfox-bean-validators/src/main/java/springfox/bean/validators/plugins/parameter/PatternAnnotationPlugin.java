@@ -46,12 +46,15 @@ public class PatternAnnotationPlugin implements ParameterBuilderPlugin {
   }
 
   @Override
+  @SuppressWarnings("deprecation")
   public void apply(ParameterContext context) {
     Optional<Pattern> pattern = annotationFromParameter(context, Pattern.class);
 
     if (pattern.isPresent()) {
       LOG.debug("@Pattern present: {}", pattern.get().regexp());
       context.parameterBuilder().pattern(pattern.get().regexp());
+      context.requestParameterBuilder()
+             .query(q -> q.stringFacet(s -> s.pattern(pattern.get().regexp())));
     }
   }
 }

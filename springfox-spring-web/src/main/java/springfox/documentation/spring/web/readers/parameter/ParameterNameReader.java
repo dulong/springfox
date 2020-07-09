@@ -40,6 +40,7 @@ import static org.springframework.util.StringUtils.*;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
+@SuppressWarnings("deprecation")
 public class ParameterNameReader implements ParameterBuilderPlugin {
 
   @Override
@@ -51,6 +52,9 @@ public class ParameterNameReader implements ParameterBuilderPlugin {
           .orElseGet(() -> format("param%s", context.resolvedMethodParameter().getParameterIndex()));
     }
     context.parameterBuilder()
+        .name(name)
+        .description(name);
+    context.requestParameterBuilder()
         .name(name)
         .description(name);
   }

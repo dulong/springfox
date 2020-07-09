@@ -26,27 +26,45 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static springfox.documentation.builders.BuilderDefaults.*;
+
 public class SecurityContextBuilder {
   private List<SecurityReference> securityReferences = new ArrayList<>();
-  private Predicate<String> pathSelector = (each) -> true;
-  private Predicate<HttpMethod> methodSelector;
+  private Predicate<String> pathSelector = each -> true;
+  private Predicate<HttpMethod> methodSelector = each -> true;
+  private Predicate<OperationContext> operationSelector;
 
-  SecurityContextBuilder() {
-  }
-
-  public SecurityContextBuilder securityReferences(
-      List<SecurityReference> securityReferences) {
-    this.securityReferences = securityReferences;
+  public SecurityContextBuilder securityReferences(List<SecurityReference> securityReferences) {
+    this.securityReferences.addAll(nullToEmptyList(securityReferences));
     return this;
   }
 
+  /**
+   * Use {@link SecurityContextBuilder#operationSelector} instead
+   * @deprecated @since 3.0.0
+   * @param selector - path selector
+   * @return this
+   */
+  @Deprecated
   public SecurityContextBuilder forPaths(Predicate<String> selector) {
-    this.pathSelector = selector;
+    this.pathSelector = defaultIfAbsent(selector, this.pathSelector);
     return this;
   }
 
+  /**
+   * Use {@link SecurityContextBuilder#operationSelector} instead
+   * @deprecated @since 3.0.0
+   * @param methodSelector - http method selector
+   * @return this
+   */
+  @Deprecated
   public SecurityContextBuilder forHttpMethods(Predicate<HttpMethod> methodSelector) {
-    this.methodSelector = methodSelector;
+    this.methodSelector = defaultIfAbsent(methodSelector, this.methodSelector);
+    return this;
+  }
+
+  public SecurityContextBuilder operationSelector(Predicate<OperationContext> selector) {
+    this.operationSelector = selector;
     return this;
   }
 
@@ -54,12 +72,10 @@ public class SecurityContextBuilder {
     if (securityReferences == null) {
       securityReferences = new ArrayList<>();
     }
-    if (methodSelector == null) {
-      methodSelector = (each) -> true;
-    }
     return new SecurityContext(
         securityReferences,
         pathSelector,
-        methodSelector);
+        methodSelector,
+        operationSelector);
   }
 }

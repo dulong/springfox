@@ -26,19 +26,17 @@ import springfox.documentation.OperationNameGenerator;
 import java.util.HashMap;
 import java.util.Map;
 
-
-
 @Component
 public class CachingOperationNameGenerator implements OperationNameGenerator {
   private static final Logger LOG = LoggerFactory.getLogger(CachingOperationNameGenerator.class);
-  private Map<String, Integer> generated = new HashMap<>();
+  private final Map<String, Integer> generated = new HashMap<>();
 
   @Override
   public String startingWith(String prefix) {
     if (generated.containsKey(prefix)) {
       generated.put(prefix, generated.get(prefix) + 1);
       String nextUniqueOperationName = String.format("%s_%s", prefix, generated.get(prefix));
-      LOG.info("Generating unique operation named: {}", nextUniqueOperationName);
+      LOG.debug("Generating unique operation named: {}", nextUniqueOperationName);
       return nextUniqueOperationName;
     } else {
       generated.put(prefix, 0);

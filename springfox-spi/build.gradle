@@ -1,5 +1,9 @@
 dependencies {
-  compile project(':springfox-core')
-  provided libs.clientProvidedServlet
-  testCompile libs.test
+  api project(':springfox-core')
+  compileOnly libs.clientProvided
+  compileOnly libs.springProvided
+  
+  testImplementation libs.test
+  testImplementation libs.clientProvided
+  testImplementation libs.springProvided
 }

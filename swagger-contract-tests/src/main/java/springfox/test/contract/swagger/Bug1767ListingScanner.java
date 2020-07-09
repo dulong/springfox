@@ -20,12 +20,14 @@ package springfox.test.contract.swagger;
 
 import com.fasterxml.classmate.TypeResolver;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import springfox.documentation.builders.OperationBuilder;
-import springfox.documentation.builders.ParameterBuilder;
-import springfox.documentation.builders.ResponseMessageBuilder;
-import springfox.documentation.schema.ModelRef;
+import springfox.documentation.builders.RequestParameterBuilder;
+import springfox.documentation.builders.ResponseBuilder;
+import springfox.documentation.schema.ScalarType;
 import springfox.documentation.service.ApiDescription;
-import springfox.documentation.service.ResponseMessage;
+import springfox.documentation.service.ParameterType;
+import springfox.documentation.service.Response;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.service.ApiListingScannerPlugin;
 import springfox.documentation.spi.service.contexts.DocumentationContext;
@@ -33,13 +35,17 @@ import springfox.documentation.spring.web.readers.operation.CachingOperationName
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import static java.util.Collections.*;
 
-@SuppressWarnings({"WhitespaceAround", "ParenPad"})
+@SuppressWarnings({
+    "WhitespaceAround",
+    "ParenPad",
+    "deprecation"})
 public class Bug1767ListingScanner implements ApiListingScannerPlugin {
 
   // tag::api-listing-plugin[]
@@ -60,32 +66,48 @@ public class Bug1767ListingScanner implements ApiListingScannerPlugin {
             new ApiDescription(
                 "test",
                 "/bugs/1767",
+                "This is a bug summary",
                 "This is a bug",
                 Collections.singletonList( //<2>
-                    new OperationBuilder(
-                        operationNames)
+                    new OperationBuilder(operationNames)
                         .authorizations(new ArrayList<>())
                         .codegenMethodNameStem("bug1767GET") //<3>
                         .method(HttpMethod.GET)
                         .notes("This is a test method")
                         .parameters(
                             Collections.singletonList( //<4>
-                                new ParameterBuilder()
-                                    .description("search by description")
-                                    .type(new TypeResolver().resolve(String.class))
+                                new springfox.documentation.builders.ParameterBuilder()
+                                    .description(
+                                        "search by "
+                                            + "description")
+                                    .type(new TypeResolver()
+                                        .resolve(String.class))
                                     .name("description")
                                     .parameterType("query")
                                     .parameterAccess("access")
                                     .required(true)
-                                    .modelRef(new ModelRef("string")) //<5>
+                                    .modelRef(new springfox.documentation.schema.ModelRef(
+                                        "string")) //<5>
                                     .build()))
-                        .responseMessages(responseMessages()) //<6>
-                        .responseModel(new ModelRef("string")) //<7>
+                        .requestParameters(
+                            Collections.singletonList( //<4a>
+                                new RequestParameterBuilder()
+                                    .description("search by description")
+                                    .name("description")
+                                    .required(true)
+                                    .in(ParameterType.QUERY)
+                                    .query(q -> q.model(m -> m.scalarModel(ScalarType.STRING))) //<5b>
+                                    .build()))
+                        .responses(responseMessages()) //<6>
+                        .responseModel(new springfox.documentation.schema.ModelRef("string")) //<7>
+                        .responses(responses()) //<6b>
                         .build()),
                 false),
             new ApiDescription(
-                "different-group", //<8>
+                "different-group",
+                //<8>
                 "/different/2219",
+                "This is a bug summary",
                 "This is a bug",
                 Collections.singletonList(
                     new OperationBuilder(
@@ -96,17 +118,26 @@ public class Bug1767ListingScanner implements ApiListingScannerPlugin {
                         .notes("This is a test method")
                         .parameters(
                             Collections.singletonList(
-                                new ParameterBuilder()
+                                new springfox.documentation.builders.ParameterBuilder()
                                     .description("description of bug 2219")
                                     .type(new TypeResolver().resolve(String.class))
                                     .name("description")
                                     .parameterType("query")
                                     .parameterAccess("access")
                                     .required(true)
-                                    .modelRef(new ModelRef("string"))
+                                    .modelRef(new springfox.documentation.schema.ModelRef("string"))
                                     .build()))
-                        .responseMessages(responseMessages())
-                        .responseModel(new ModelRef("string"))
+                        .requestParameters(
+                            Collections.singletonList(
+                                new RequestParameterBuilder()
+                                    .description("description of bug 2219")
+                                    .name("description")
+                                    .in("query")
+                                    .required(true)
+                                    .query(q -> q.model(m -> m.scalarModel(ScalarType.STRING)))
+                                    .build()))
+                        .responses(responseMessages())
+                        .responseModel(new springfox.documentation.schema.ModelRef("string"))
                         .build()),
                 false)));
   }
@@ -114,14 +145,28 @@ public class Bug1767ListingScanner implements ApiListingScannerPlugin {
   /**
    * @return Set of response messages that overide the default/global response messages
    */
-  private Set<ResponseMessage> responseMessages() { //<8>
-    return singleton(new ResponseMessageBuilder()
-        .code(200)
-        .message("Successfully received bug 1767 or 2219 response")
-        .responseModel(new ModelRef("string"))
+  private Set<Response> responseMessages() { //<8>
+    return singleton(new springfox.documentation.builders.ResponseBuilder()
+        .code("200")
+        .description("Successfully received bug 1767 or 2219 response")
+        .representation(MediaType.TEXT_PLAIN)
+        .apply(r -> r.model(m -> m.scalarModel(ScalarType.STRING)))
         .build());
   }
-  // tag::api-listing-plugin[]
+
+  /**
+   * @return Set of response messages that overide the default/global response messages
+   */
+  private Collection<Response> responses() { //<8b>
+    return singletonList(new ResponseBuilder()
+        .code("200")
+        .description("Successfully received bug 1767 or 2219 response")
+        .representation(MediaType.ALL)
+        .apply(r -> r.model(m -> m.scalarModel(ScalarType.STRING))
+            .build())
+        .build());
+  }
+  // end::api-listing-plugin[]
 
   @Override
   public boolean supports(DocumentationType delimiter) {

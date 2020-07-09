@@ -21,7 +21,6 @@ package springfox.documentation.swagger2.mappers;
 
 import com.fasterxml.classmate.ResolvedType;
 import io.swagger.models.properties.ArrayProperty;
-import io.swagger.models.properties.BaseIntegerProperty;
 import io.swagger.models.properties.BooleanProperty;
 import io.swagger.models.properties.ByteArrayProperty;
 import io.swagger.models.properties.DateProperty;
@@ -38,170 +37,142 @@ import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
 import io.swagger.models.properties.UUIDProperty;
-import springfox.documentation.schema.ModelProperty;
-import springfox.documentation.schema.ModelReference;
 
 import java.math.BigDecimal;
-import java.util.AbstractMap;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
-import static java.util.Collections.*;
 import static java.util.Optional.*;
-import static java.util.stream.Collectors.*;
 import static springfox.documentation.schema.Collections.*;
-import static springfox.documentation.schema.Types.*;
+import static springfox.documentation.schema.ResolvedTypes.*;
 import static springfox.documentation.swagger2.mappers.EnumMapper.*;
 
+/**
+ * Use {@link ModelSpecificationMapper} instead
+ *
+ * @deprecated @since 3.0.0
+ */
+@Deprecated
 class Properties {
-  private static final Map<String, Function<String, ? extends Property>> TYPE_FACTORY
-      = unmodifiableMap(Stream.of(
-      new AbstractMap.SimpleEntry<>("int", newInstanceOf(IntegerProperty.class)),
-      new AbstractMap.SimpleEntry<>("long", newInstanceOf(LongProperty.class)),
-      new AbstractMap.SimpleEntry<>("float", newInstanceOf(FloatProperty.class)),
-      new AbstractMap.SimpleEntry<>("double", newInstanceOf(DoubleProperty.class)),
-      new AbstractMap.SimpleEntry<>("string", newInstanceOf(StringProperty.class)),
-      new AbstractMap.SimpleEntry<>("boolean", newInstanceOf(BooleanProperty.class)),
-      new AbstractMap.SimpleEntry<>("date", newInstanceOf(DateProperty.class)),
-      new AbstractMap.SimpleEntry<>("date-time", newInstanceOf(DateTimeProperty.class)),
-      new AbstractMap.SimpleEntry<>("bigdecimal", newInstanceOf(DecimalProperty.class)),
-      new AbstractMap.SimpleEntry<>("biginteger", newInstanceOf(BaseIntegerProperty.class)),
-      new AbstractMap.SimpleEntry<>("uuid", newInstanceOf(UUIDProperty.class)),
-      new AbstractMap.SimpleEntry<>("object", newInstanceOf(ObjectProperty.class)),
-      new AbstractMap.SimpleEntry<>("byte", bytePropertyFactory()),
-      new AbstractMap.SimpleEntry<>("__file", filePropertyFactory()))
-      .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
+  private static final Map<String, Function<String, Property>> TYPE_FACTORY = new HashMap<>();
+
+  static {
+    TYPE_FACTORY.put("int", newInstanceOf(IntegerProperty.class));
+    TYPE_FACTORY.put("long", newInstanceOf(LongProperty.class));
+    TYPE_FACTORY.put("float", newInstanceOf(FloatProperty.class));
+    TYPE_FACTORY.put("double", newInstanceOf(DoubleProperty.class));
+    TYPE_FACTORY.put("string", newInstanceOf(StringProperty.class));
+    TYPE_FACTORY.put("boolean", newInstanceOf(BooleanProperty.class));
+    TYPE_FACTORY.put("date", newInstanceOf(DateProperty.class));
+    TYPE_FACTORY.put("date-time", newInstanceOf(DateTimeProperty.class));
+    TYPE_FACTORY.put("bigdecimal", newInstanceOf(DecimalProperty.class));
+    TYPE_FACTORY.put("biginteger", newInstanceOf(LongProperty.class));
+    TYPE_FACTORY.put("uuid", newInstanceOf(UUIDProperty.class));
+    TYPE_FACTORY.put("object", newInstanceOf(ObjectProperty.class));
+    TYPE_FACTORY.put("byte", bytePropertyFactory());
+    TYPE_FACTORY.put("__file", filePropertyFactory());
+  }
 
   private Properties() {
     throw new UnsupportedOperationException();
   }
 
-  public static Property property(final String typeName) {
+  public static Property property(String typeName) {
     String safeTypeName = ofNullable(typeName).orElse("");
     return TYPE_FACTORY.getOrDefault(safeTypeName.toLowerCase(), voidOrRef(safeTypeName)).apply(safeTypeName);
   }
 
-  public static Property property(final ModelReference modelRef) {
+  public static Property property(springfox.documentation.schema.ModelReference modelRef) {
     if (modelRef.isMap()) {
-      return new MapProperty(property(modelRef.itemModel().get()));
+      return new MapProperty(property(modelRef.itemModel()
+          .orElseThrow(() -> new IllegalStateException("ModelRef that is a map should have an itemModel"))));
     } else if (modelRef.isCollection()) {
-      if ("byte".equals(modelRef.itemModel().map(toTypeName()).orElse(""))) {
+      if ("byte".equals(modelRef.itemModel()
+          .map(springfox.documentation.schema.ModelReference::getType).orElse(""))) {
         return new ByteArrayProperty();
       }
       return new ArrayProperty(
-          maybeAddAllowableValues(itemTypeProperty(modelRef.itemModel().get()), modelRef.getAllowableValues()));
+          maybeAddAllowableValues(itemTypeProperty(modelRef.itemModel()
+                  .orElseThrow(() ->
+                      new IllegalStateException("ModelRef that is a collection should have an itemModel"))),
+              modelRef.getAllowableValues()));
     }
     return property(modelRef.getType());
   }
 
-  private static Function<? super ModelReference, String> toTypeName() {
-    return new Function<ModelReference, String>() {
-      @Override
-      public String apply(ModelReference input) {
-        return input.getType();
-      }
-    };
-  }
-
-  public static Property itemTypeProperty(ModelReference paramModel) {
+  public static Property itemTypeProperty(springfox.documentation.schema.ModelReference paramModel) {
     if (paramModel.isCollection()) {
       return new ArrayProperty(
-          maybeAddAllowableValues(itemTypeProperty(paramModel.itemModel().get()), paramModel.getAllowableValues()));
+          maybeAddAllowableValues(itemTypeProperty(paramModel.itemModel()
+                  .orElseThrow(() ->
+                      new IllegalStateException("ModelRef that is a collection should have an itemModel"))),
+              paramModel.getAllowableValues()));
     }
     return property(paramModel.getType());
   }
 
-  private static <T extends Property> Function<String, T> newInstanceOf(final Class<T> clazz) {
-    return new Function<String, T>() {
-      @Override
-      public T apply(String input) {
-        try {
-          return clazz.newInstance();
-        } catch (Exception e) {
-          //This is bad! should never come here
-          throw new IllegalStateException(e);
-        }
+  private static Function<String, Property> newInstanceOf(final Class<? extends Property> clazz) {
+    return input -> {
+      try {
+        return clazz.getDeclaredConstructor().newInstance();
+      } catch (Exception e) {
+        //This is bad! should never come here
+        throw new IllegalStateException(e);
       }
     };
   }
 
-  static Comparator<String> defaultOrdering(Map<String, ModelProperty> properties) {
+  static Comparator<String> defaultOrdering(Map<String, springfox.documentation.schema.ModelProperty> properties) {
     return byPosition(properties).thenComparing(byName());
   }
 
-  private static Function<String, ? extends Property> voidOrRef(final String typeName) {
-    return new Function<String, Property>() {
-      @Override
-      public Property apply(String input) {
-        if (typeName.equalsIgnoreCase("void")) {
-          return null;
-        }
-        return new RefProperty(typeName);
+  private static Function<String, Property> voidOrRef(final String typeName) {
+    return input -> {
+      if (typeName.equalsIgnoreCase("void")) {
+        return null;
       }
+      return new RefProperty(typeName);
     };
   }
 
-  private static Function<String, ? extends Property> bytePropertyFactory() {
-    return new Function<String, Property>() {
-      @Override
-      public Property apply(String input) {
-        final IntegerProperty integerProperty = new IntegerProperty();
-        integerProperty.setFormat("int32");
-        integerProperty.setMaximum(BigDecimal.valueOf(Byte.MAX_VALUE));
-        integerProperty.setMinimum(BigDecimal.valueOf(Byte.MIN_VALUE));
-        return integerProperty;
-      }
+  private static Function<String, Property> bytePropertyFactory() {
+    return input -> {
+      final IntegerProperty integerProperty = new IntegerProperty();
+      integerProperty.setFormat("int32");
+      integerProperty.setMaximum(BigDecimal.valueOf(Byte.MAX_VALUE));
+      integerProperty.setMinimum(BigDecimal.valueOf(Byte.MIN_VALUE));
+      return integerProperty;
     };
   }
 
-  private static Function<String, ? extends Property> filePropertyFactory() {
-    return new Function<String, Property>() {
-      @Override
-      public Property apply(String input) {
-        return new FileProperty();
-      }
-    };
+  private static Function<String, Property> filePropertyFactory() {
+    return input -> new FileProperty();
   }
 
   private static Comparator<String> byName() {
-    return new Comparator<String>() {
-      @Override
-      public int compare(String first, String second) {
-        return first.compareTo(second);
-      }
+    return String::compareTo;
+  }
+
+  private static Comparator<String> byPosition(
+      Map<String, springfox.documentation.schema.ModelProperty> modelProperties) {
+    return (first, second) -> {
+      springfox.documentation.schema.ModelProperty p1 = modelProperties.get(first);
+      springfox.documentation.schema.ModelProperty p2 = modelProperties.get(second);
+      return Integer.compare(p1.getPosition(), p2.getPosition());
     };
   }
 
-  private static Comparator<String> byPosition(final Map<String, ModelProperty> modelProperties) {
-    return new Comparator<String>() {
-      @Override
-      public int compare(String first, String second) {
-        ModelProperty p1 = modelProperties.get(first);
-        ModelProperty p2 = modelProperties.get(second);
-        return Integer.compare(p1.getPosition(), p2.getPosition());
-      }
-    };
-  }
-
-  static Predicate<Map.Entry<String, ModelProperty>> voidProperties() {
-    return new Predicate<Map.Entry<String, ModelProperty>>() {
-      @Override
-      public boolean test(Map.Entry<String, ModelProperty> input) {
-        return isVoid(input.getValue().getType())
-            || collectionOfVoid(input.getValue().getType())
-            || arrayTypeOfVoid(input.getValue().getType().getArrayElementType());
-      }
-    };
-  }
-
-  private static boolean arrayTypeOfVoid(ResolvedType arrayElementType) {
-    return arrayElementType != null && isVoid(arrayElementType);
+  static Predicate<Map.Entry<String, springfox.documentation.schema.ModelProperty>> voidProperties() {
+    return input -> isVoid(input.getValue().getType())
+        || collectionOfVoid(input.getValue().getType())
+        || isVoid(input.getValue().getType().getArrayElementType());
   }
 
   private static boolean collectionOfVoid(ResolvedType type) {
     return isContainerType(type) && isVoid(collectionElementType(type));
   }
+
 }

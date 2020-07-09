@@ -20,28 +20,28 @@
 package springfox.documentation.builders;
 
 import springfox.documentation.schema.Example;
-import springfox.documentation.schema.ModelReference;
 import springfox.documentation.service.Header;
-import springfox.documentation.service.ResponseMessage;
 import springfox.documentation.service.VendorExtension;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.Function;
 
-import static java.util.stream.Collectors.*;
 import static springfox.documentation.builders.BuilderDefaults.*;
 
+/**
+ * Use {@link ResponseBuilder} instead
+ * @deprecated @since 3.0.0
+ */
+@Deprecated
 public class ResponseMessageBuilder {
   private int code;
   private String message;
-  private ModelReference responseModel;
-  private List<Example> examples = new ArrayList<>();
-  private Map<String, Header> headers = new TreeMap<>();
-  private List<VendorExtension> vendorExtensions = new ArrayList<>();
+  private springfox.documentation.schema.ModelReference responseModel;
+  private final List<Example> examples = new ArrayList<>();
+  private final Map<String, Header> headers = new TreeMap<>();
+  private final List<VendorExtension> vendorExtensions = new ArrayList<>();
 
   /**
    * Updates the http response code
@@ -71,7 +71,7 @@ public class ResponseMessageBuilder {
    * @param responseModel - model reference
    * @return this
    */
-  public ResponseMessageBuilder responseModel(ModelReference responseModel) {
+  public ResponseMessageBuilder responseModel(springfox.documentation.schema.ModelReference responseModel) {
     this.responseModel = defaultIfAbsent(responseModel, this.responseModel);
     return this;
   }
@@ -86,31 +86,6 @@ public class ResponseMessageBuilder {
   public ResponseMessageBuilder examples(List<Example> examples) {
     this.examples.addAll(nullToEmptyList(examples));
     return this;
-  }
-
-  /**
-   * Updates the response headers
-   *
-   * @param headers header responses
-   * @return this
-   * @since 2.5.0
-   * @deprecated Use the {@link ResponseMessageBuilder#headersWithDescription} instead
-   */
-  @Deprecated
-  public ResponseMessageBuilder headers(Map<String, ModelReference> headers) {
-    this.headers.putAll(nullToEmptyMap(headers).entrySet().stream()
-        .map(toHeaderEntry())
-        .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
-    return this;
-  }
-
-  private Function<Map.Entry<String, ModelReference>, Map.Entry<String, Header>> toHeaderEntry() {
-    return entry -> new AbstractMap.SimpleEntry<>(
-        entry.getKey(),
-        new Header(
-            entry.getKey(),
-            "",
-            entry.getValue()));
   }
 
   /**
@@ -137,8 +112,8 @@ public class ResponseMessageBuilder {
     return this;
   }
 
-  public ResponseMessage build() {
-    return new ResponseMessage(
+  public springfox.documentation.service.ResponseMessage build() {
+    return new springfox.documentation.service.ResponseMessage(
         code,
         message,
         responseModel,

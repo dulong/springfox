@@ -46,12 +46,14 @@ public class NotNullAnnotationPlugin implements ParameterBuilderPlugin {
   }
 
   @Override
+  @SuppressWarnings("deprecation")
   public void apply(ParameterContext context) {
     Optional<NotNull> notNull = annotationFromParameter(context, NotNull.class);
 
     if (notNull.isPresent()) {
       LOG.debug("@NotNull present: setting parameter as required");
       context.parameterBuilder().required(true);
+      context.requestParameterBuilder().required(true);
     }
   }
 }

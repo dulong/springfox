@@ -15,21 +15,13 @@ import org.apache.tools.ant.filters.ReplaceTokens
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-buildscript {
-  repositories {
-    jcenter()
-  }
-
-}
-
 plugins {
-  id "de.undercouch.download" version "3.4.3"
-  id "com.moowork.node" version "1.2.0"
+  id "de.undercouch.download" version "4.0.4"
+  id "com.github.node-gradle.node" version "2.2.3"
 }
 
 ext {
-  swaggerUiVersion = '3.23.4'
+  swaggerUiVersion = '3.26.2'
   swaggerUiDist = "build/libs/swagger-ui-dist.zip"
   swaggerUiExplodedDir = "swagger-ui-${swaggerUiVersion}/dist/"
   downloadUrl = "https://github.com/swagger-api/swagger-ui/archive/v${swaggerUiVersion}.zip"
@@ -39,12 +31,12 @@ ext {
 }
 
 dependencies {
-  provided project(':springfox-spring-webmvc')
-  testCompile libs.test
+  implementation project(':springfox-spring-webmvc')
+  testImplementation libs.test
 }
 
 node {
-  version = '8.12.0' // LTS
+  version = '12.16.2' // LTS
   npmVersion = '6.4.1'
   distBaseUrl = 'https://nodejs.org/dist'
   download = true
@@ -54,6 +46,7 @@ node {
 }
 
 task swaggerUiDownload {
+  outputs.file(destinationZip) 
   doLast {
     download {
       src downloadUrl
@@ -114,30 +107,38 @@ task customizeSwaggerUi {
       from "${projectDir}/src/web/fonts"
       into "${buildDir}/${swaggerUiExplodedDir}/fonts"
     }
-    copy {
-      from "${projectDir}/src/web/swagger-ui.html"
-      into "${buildDir}/swagger-ui-${swaggerUiVersion}"
-      filter(ReplaceTokens, tokens: [VERSION: "${project.version}".toString()])
-    }
     delete "${buildDir}/${swaggerUiExplodedDir}/index.html"
     delete "${buildDir}/${swaggerUiExplodedDir}/swagger-ui.js"
+    copy {
+      from "${projectDir}/src/web/swagger-ui.html"
+      into "${buildDir}/${swaggerUiExplodedDir}"
+      rename { String fileName ->
+        // a simple way is to remove the "-$version" from the jar filename
+        // but you can customize the filename replacement rule as you wish.
+        fileName.replace("swagger-ui", "index")
+      }
+      filter(ReplaceTokens, tokens: [VERSION: "${project.version}".toString()])
+    }
   }
 }
 
 jar {
-  from("${buildDir}/swagger-ui-${swaggerUiVersion}/swagger-ui.html") {
-    into "META-INF/resources"
-  }
-
   from("${buildDir}/${swaggerUiExplodedDir}") {
     into "META-INF/resources/webjars/${project.name}"
   }
 
   manifest {
     attributes(
-        "Implementation-Title": project.name,
-        "Implementation-Version": project.version,
+        'Implementation-Title': project.name,
+        'Implementation-Version': new Object() {
+          String toString() { project.version }
+        },
         "SwaggerUi-Version": swaggerUiVersion,
+        'Created-By': System.getProperty('java.version') + ' (' + System.getProperty('java.vendor') + ')',
+        'Built-With': "gradle-${project.getGradle().getGradleVersion()}, groovy-${GroovySystem.getVersion()}",
+        'Build-Time': "${new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")}",
+        'Built-By': System.getProperty('user.name'),
+        'Built-On': "${InetAddress.localHost.hostName}/${InetAddress.localHost.hostAddress}",
     )
   }
 }

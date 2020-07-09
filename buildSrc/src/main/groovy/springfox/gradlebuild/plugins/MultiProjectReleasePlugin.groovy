@@ -107,7 +107,6 @@ class MultiProjectReleasePlugin implements Plugin<Project> {
       publishTask.dependsOn javaCheckTasks
       publishTask.dependsOn bintrayUploadTasks
     }
-
     bumpAndTagTask.dependsOn publishTask
     releaseTask.dependsOn bumpAndTagTask
   }

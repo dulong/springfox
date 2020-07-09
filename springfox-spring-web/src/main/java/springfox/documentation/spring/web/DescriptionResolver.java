@@ -29,13 +29,14 @@ import java.util.regex.Pattern;
 import static org.springframework.util.StringUtils.*;
 
 public class DescriptionResolver {
-  private static final Pattern PATTERN = Pattern.compile("\\Q${\\E(.+?)\\Q}\\E");
+  @SuppressWarnings("java:S4784")
+  private static final Pattern PATTERN = Pattern.compile("\\Q${\\E(.+?)(:(.*))?\\Q}\\E");
   private final Environment environment;
   private Map<String, String> cache;
 
   public DescriptionResolver(Environment environment) {
     this.environment = environment;
-    this.cache = new HashMap<String, String>();
+    this.cache = new HashMap<>();
   }
 
   //Thanks to http://stackoverflow.com/a/37962230/19219
@@ -43,7 +44,7 @@ public class DescriptionResolver {
     if (isEmpty(expression)) {
       return expression;
     }
-    
+
     // Check if the expression is already been parsed
     if (cache.containsKey(expression)) {
       return cache.get(expression);
@@ -69,6 +70,7 @@ public class DescriptionResolver {
 
       // Store the value
       String key = matcher.group(1);
+      String defaultValue = matcher.group(3);
 
       // Get the value
       String value = environment.getProperty(key);
@@ -82,6 +84,11 @@ public class DescriptionResolver {
         // return the value
         return value;
 
+      } else if (defaultValue != null) {
+        // use default if value not found
+        cache.put(expression, defaultValue);
+
+        return defaultValue;
       }
 
     }

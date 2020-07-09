@@ -43,7 +43,6 @@ import java.util.Map;
 import static java.util.Optional.*;
 import static springfox.documentation.schema.Collections.*;
 import static springfox.documentation.schema.Maps.*;
-import static springfox.documentation.schema.Types.*;
 
 @Component
 public class TypeNameExtractor {
@@ -104,7 +103,7 @@ public class TypeNameExtractor {
       return knownNames.get(typeId);
     }
     String simpleName = ofNullable(
-        isContainerType(resolvedType) ? containerType(resolvedType) : typeNameFor(erasedType))
+        isContainerType(resolvedType) ? containerType(resolvedType) : typeName(erasedType))
         .orElse(modelName(
             ModelContext.fromParent(
                 context,
@@ -159,7 +158,7 @@ public class TypeNameExtractor {
       Map<String, String> knownNames) {
     Class<?> erasedType = type.getErasedType();
     if (type instanceof ResolvedPrimitiveType) {
-      return typeNameFor(erasedType);
+      return typeName(erasedType);
     } else if (enumTypeDeterminer.isEnum(erasedType)) {
       return "string";
     } else if (type instanceof ResolvedArrayType) {
@@ -173,7 +172,7 @@ public class TypeNameExtractor {
               knownNames),
           namingStrategy.getCloseGeneric());
     } else if (type instanceof ResolvedObjectType) {
-      String typeName = typeNameFor(erasedType);
+      String typeName = typeName(erasedType);
       if (typeName != null) {
         return typeName;
       }
@@ -185,13 +184,18 @@ public class TypeNameExtractor {
         knownNames);
   }
 
+  @SuppressWarnings("deprecation")
+  private String typeName(Class<?> erasedType) {
+    return Types.typeNameFor(erasedType);
+  }
+
   private String modelName(
       ModelContext context,
       Map<String, String> knownNames) {
     if (!isMapType(asResolved(context.getType())) && knownNames.containsKey(context.getTypeId())) {
       return knownNames.get(context.getTypeId());
     }
-    TypeNameProviderPlugin selected = typeNameProviders.getPluginFor(
+    TypeNameProviderPlugin selected = typeNameProviders.getPluginOrDefaultFor(
         context.getDocumentationType(),
         new DefaultTypeNameProvider());
     String modelName = selected.nameFor(((ResolvedType) context.getType()).getErasedType());

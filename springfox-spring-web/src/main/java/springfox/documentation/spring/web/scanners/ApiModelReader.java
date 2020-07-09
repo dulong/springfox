@@ -26,12 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import springfox.documentation.builders.ModelBuilder;
-import springfox.documentation.builders.ModelPropertyBuilder;
-import springfox.documentation.schema.Model;
-import springfox.documentation.schema.ModelProperty;
-import springfox.documentation.schema.ModelProvider;
-import springfox.documentation.schema.ModelReference;
+import org.springframework.util.StringUtils;
 import springfox.documentation.schema.TypeNameExtractor;
 import springfox.documentation.schema.TypeNameIndexingAdapter;
 import springfox.documentation.spi.schema.EnumTypeDeterminer;
@@ -51,15 +46,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static springfox.documentation.schema.ResolvedTypes.*;
 
 @Component
+@Deprecated
 public class ApiModelReader {
   private static final Logger LOG = LoggerFactory.getLogger(ApiModelReader.class);
-  private final ModelProvider modelProvider;
+  private final springfox.documentation.schema.ModelProvider modelProvider;
   private final TypeResolver typeResolver;
   private final DocumentationPluginsManager pluginsManager;
   private final EnumTypeDeterminer enumTypeDeterminer;
@@ -67,7 +62,7 @@ public class ApiModelReader {
 
   @Autowired
   public ApiModelReader(
-      @Qualifier("cachedModels") ModelProvider modelProvider,
+      @Qualifier("cachedModels") springfox.documentation.schema.ModelProvider modelProvider,
       TypeResolver typeResolver,
       DocumentationPluginsManager pluginsManager,
       EnumTypeDeterminer enumTypeDeterminer,
@@ -79,235 +74,159 @@ public class ApiModelReader {
     this.typeNameExtractor = typeNameExtractor;
   }
 
-  @SuppressWarnings({"rawtypes", "NPathComplexity"})
-  public Map<String, Set<Model>> read(RequestMappingContext context) {
-    Map<String, Set<Model>> mergedModelMap = new TreeMap<>();
-    final UniqueTypeNameAdapter adapter = new TypeNameIndexingAdapter();
+  @SuppressWarnings("rawtypes")
+  public Map<String, Set<springfox.documentation.schema.Model>> read(RequestMappingContext context) {
+    Map<String, Set<springfox.documentation.schema.Model>> mergedModelMap = new TreeMap<>();
 
-    Set<Class> ignorableTypes = new HashSet<>(context.getIgnorableParameterTypes());
+    Map<String, springfox.documentation.schema.Model> uniqueModels = new HashMap<>();
+    Map<String, String> parameterModelMap = new HashMap<>();
+
+    UniqueTypeNameAdapter adapter = new TypeNameIndexingAdapter();
+
+    Set<Class> ignorableTypes = context.getIgnorableParameterTypes();
     Set<ModelContext> modelContexts = pluginsManager.modelContexts(context);
-    Map<String, Set<Model>> modelMap = new TreeMap<>(context.getModelMap());
-    for (Set<Model> modelList : modelMap.values()) {
-      for (Model model : modelList) {
-        adapter.registerType(
-            model.getName(),
-            model.getId());
-      }
+
+    for (Map.Entry<String, Set<springfox.documentation.schema.Model>> entry : context.getModelMap().entrySet()) {
+      entry.getValue().stream()
+          .filter(model -> !uniqueModels.containsKey(model.getName()))
+          .forEach(
+              model -> {
+                adapter.registerType(
+                    model.getName(),
+                    model.getId());
+                uniqueModels.put(
+                    model.getName(),
+                    model);
+                parameterModelMap.put(
+                    model.getId(),
+                    entry.getKey());
+              });
     }
 
-    MergingContext mergingContext = populateTypes(modelMap);
-
     for (ModelContext rootContext : modelContexts) {
-      Map<String, Model> modelBranch = new HashMap<>();
-      final Map<String, ModelContext> contextMap = new HashMap<>();
-      markIgnorablesAsHasSeen(
-          typeResolver,
-          ignorableTypes,
-          rootContext);
-      Optional<Model> pModel = modelProvider.modelFor(rootContext);
+      Map<String, springfox.documentation.schema.Model> modelBranch = new HashMap<>();
+      Map<String, ModelContext> contextMap = new HashMap<>();
+      markIgnorablesAsHasSeen(typeResolver, ignorableTypes, rootContext);
+      Optional<springfox.documentation.schema.Model> pModel = modelProvider.modelFor(rootContext);
       List<String> branchRoots = new ArrayList<>();
       if (pModel.isPresent()) {
         LOG.debug(
             "Generated parameter model id: {}, name: {}",
             pModel.get().getId(),
             pModel.get().getName());
-        modelBranch.put(
-            pModel.get().getId(),
-            pModel.get());
-        contextMap.put(
-            pModel.get().getId(),
-            rootContext);
-        branchRoots.add(rootContext.getTypeId());
+        modelBranch.put(pModel.get().getId(), pModel.get());
+        contextMap.put(pModel.get().getId(), rootContext);
+        branchRoots.add(rootContext.getModelId());
       } else {
         branchRoots = findBranchRoots(rootContext);
-        LOG.debug(
-            "Did not find any parameter models for {}",
-            rootContext.getType());
+        LOG.debug("Did not find any parameter models for {}", rootContext.getType());
       }
 
-      Map<ResolvedType, Model> dependencies = modelProvider.dependencies(rootContext);
+      Map<ResolvedType, springfox.documentation.schema.Model> dependencies = modelProvider.dependencies(rootContext);
       for (ResolvedType type : dependencies.keySet()) {
-        ModelContext childContext = ModelContext.fromParent(
-            rootContext,
-            type);
-        modelBranch.put(
-            dependencies.get(type).getId(),
-            dependencies.get(type));
-        contextMap.put(
-            dependencies.get(type).getId(),
-            childContext);
+        ModelContext childContext = ModelContext.fromParent(rootContext, type);
+        modelBranch.put(dependencies.get(type).getId(), dependencies.get(type));
+        contextMap.put(dependencies.get(type).getId(), childContext);
       }
 
       if (modelBranch.isEmpty()) {
         continue;
       }
-      mergingContext = mergingContext.withNewBranch(
-          modelBranch,
-          contextMap);
-      for (String rootId : branchRoots) {
-        if (modelBranch.containsKey(rootId)) {
-          mergeModelBranch(
-              adapter,
-              mergingContext.toRootId(rootId));
-        }
-      }
 
-      Set<Model> updatedModels = updateModels(
+      MergingContext mergingContext = createMergingContext(
+          rootContext.getParameterId(),
+          Collections.unmodifiableMap(uniqueModels),
+          Collections.unmodifiableMap(parameterModelMap),
+          Collections.unmodifiableMap(modelBranch),
+          Collections.unmodifiableMap(contextMap));
+
+      branchRoots.stream()
+          .filter(modelBranch::containsKey)
+          .forEach(rootId -> mergeModelBranch(adapter, mergingContext.toRootId(rootId)));
+
+      Set<springfox.documentation.schema.Model> updatedModels = updateModels(
+          rootContext.getParameterId(),
           modelBranch.values(),
           contextMap,
           adapter);
-      mergedModelMap.put(
-          rootContext.getParameterId(),
-          updatedModels);
-      modelMap.put(
-          rootContext.getParameterId(),
-          updatedModels);
-      mergingContext = populateTypes(modelMap);
+      mergedModelMap.put(rootContext.getParameterId(), updatedModels);
+
+      updatedModels.stream().filter(model -> !uniqueModels.containsKey(model.getName())).forEach(
+          model -> {
+            uniqueModels.put(model.getName(), model);
+            parameterModelMap.put(model.getId(), rootContext.getParameterId());
+          });
     }
 
     return Collections.unmodifiableMap(mergedModelMap);
   }
 
-  @SuppressWarnings({"CyclomaticComplexity", "NPathComplexity"})
   private Set<ComparisonCondition> mergeModelBranch(
       UniqueTypeNameAdapter adapter,
       MergingContext mergingContext) {
 
-    Model rootModel = mergingContext.getRootModel();
-    final Set<String> nodes = new HashSet<>();
-    for (ModelReference modelReference : rootModel.getSubTypes()) {
-      Optional<String> modelId = getModelId(modelReference);
-
-      if (modelId.isPresent() && mergingContext.containsModel(modelId.get())) {
-        nodes.add(modelId.get());
-      }
-    }
-
-    final ModelContext rootModelContext = mergingContext.getModelContext(mergingContext.getRootId());
-    for (ResolvedType type : rootModel.getType().getTypeParameters()) {
-      String modelId = ModelContext.fromParent(
-          rootModelContext,
-          rootModelContext.alternateFor(type)).getTypeId();
-      if (mergingContext.containsModel(modelId)) {
-        nodes.add(modelId);
-      }
-    }
-
-    for (ModelProperty modelProperty : rootModel.getProperties().values()) {
-      Optional<String> modelId = getModelId(modelProperty.getModelRef());
-
-      if (modelId.isPresent() && mergingContext.containsModel(modelId.get())) {
-        nodes.add(modelId.get());
-      }
-    }
-
-    Optional<ComparisonCondition> currentComparisonCondition = Optional.empty();
-    Set<String> sameModels = new HashSet<>();
-    Set<Model> modelsToCompare = new HashSet<>();
-
-    if (!nodes.isEmpty()) {
-      mergingContext = mergeNodes(
-          nodes,
-          adapter,
-          mergingContext);
-      modelsToCompare.addAll(buildModels(
-          adapter,
-          mergingContext));
-    } else {
-      modelsToCompare.add(rootModel);
-    }
-
-    for (Model modelFor : modelsToCompare) {
-      Optional<String> sameModel = findSameModels(
-          modelFor,
-          mergingContext);
-
-      sameModel.ifPresent(sameModels::add);
-    }
-
-    if (!sameModels.isEmpty()) {
-      currentComparisonCondition = Optional
-          .of(new ComparisonCondition(
-              mergingContext.getRootId(),
-              sameModels,
-              mergingContext.getDependencies()));
-    }
-
-    return mergeConditions(
-        currentComparisonCondition,
-        adapter,
-        mergingContext);
-
-  }
-
-  @SuppressWarnings({"CyclomaticComplexity", "NPathComplexity"})
-  private MergingContext mergeNodes(
-      final Set<String> nodes,
-      final UniqueTypeNameAdapter adapter,
-      final MergingContext mergingContext) {
-
-    boolean allowableToSearchTheSame = true;
-    final Map<String, Set<String>> comparisonConditions = new HashMap<>();
-    final Set<String> comparedParemeters = new HashSet<>();
+    Set<String> nodes = collectNodes(adapter, mergingContext);
 
     Set<ComparisonCondition> dependencies = new HashSet<>();
-    final Set<String> currentDependencies = new HashSet<>();
+    Set<String> currentDependencies = new HashSet<>();
 
-    for (final String modelId : nodes) {
-      if (adapter.getTypeName(modelId).isPresent()) {
+    boolean allowableToSearchTheSame = true;
+
+    Map<String, Optional<String>> comparisonConditions = new HashMap<>();
+    Set<String> parametersTo = new HashSet<>();
+
+    for (String modelId : nodes) {
+      if (adapter.getTypeName(toTypeId(mergingContext.getParameterId(), modelId)).isPresent()) {
         continue;
       }
 
       if (!mergingContext.hasSeenBefore(modelId)) {
-        Set<ComparisonCondition> newDependencies = mergeModelBranch(
-            adapter,
-            mergingContext.toRootId(modelId));
+
+        MergingContext childMergingContext = createChildMergingContext(
+            modelId,
+            !currentDependencies.isEmpty(),
+            parametersTo,
+            dependencies,
+            mergingContext
+        );
+
+        Set<ComparisonCondition> newDependencies = childMergingContext
+            .getComparisonCondition(modelId)
+            .<Set<ComparisonCondition>>map(
+                reenteredCondition -> new HashSet<>(Collections.singletonList(reenteredCondition)))
+            .orElseGet(() -> mergeModelBranch(adapter, childMergingContext));
 
         if (newDependencies.isEmpty()) {
           allowableToSearchTheSame = false;
+          parametersTo = new HashSet<>();
           continue;
         }
 
-        for (ComparisonCondition condition : newDependencies) {
-          checkCondition(
-              condition,
-              false);
-          if (!condition.getConditions().isEmpty()) {
-            dependencies.add(condition);
-            currentDependencies.addAll(condition.getConditions());
-          }
-        }
+        newDependencies.stream()
+            .peek(d -> checkCondition(d, false))
+            .filter(d -> !d.getConditions().isEmpty())
+            .forEach(p -> {
+              dependencies.add(p);
+              currentDependencies.addAll(p.getConditions());
+            });
 
         if (!allowableToSearchTheSame) {
           continue;
         }
 
-        ComparisonCondition currentCondition = currentCondition(
-            modelId,
-            newDependencies);
-        Set<String> parametersTo = currentCondition.getModelsTo().stream()
-            .map(mergingContext::getModelParameter)
-            .collect(Collectors.toSet());
+        ComparisonCondition currentCondition = currentCondition(modelId, newDependencies);
 
         if (currentCondition.getConditions().isEmpty()) {
           comparisonConditions.put(
               modelId,
-              Collections.unmodifiableSet(parametersTo));
-        } else {
-          comparisonConditions.put(
-              modelId,
-              new HashSet<>());
-
-          if (comparedParemeters.isEmpty()) {
-            comparedParemeters.addAll(parametersTo);
-          } else {
-            comparedParemeters.retainAll(parametersTo);
-          }
-
-          if (comparedParemeters.isEmpty()) {
-            allowableToSearchTheSame = false;
-          }
+              currentCondition.getModelsTo()
+                  .stream()
+                  .map(mergingContext::getModelParameter)
+                  .findFirst());
+          continue;
         }
+
+        parametersTo = modelsToParameters(currentCondition.getModelsTo(), mergingContext);
       } else {
         currentDependencies.add(modelId);
 
@@ -315,266 +234,309 @@ public class ApiModelReader {
           continue;
         }
 
-        comparisonConditions.put(
+        Optional<Set<String>> megedParameters = mergeParameters(
             modelId,
-            new HashSet<>());
-        String modelForTypeName = mergingContext.getModel(modelId).getType().getErasedType().getName();
-        Set<Model> similarTypeModels = mergingContext.getSimilarTypeModels(modelForTypeName);
-        Set<String> candidateParameters = similarTypeModels.stream()
-            .map(model -> mergingContext.getModelParameter(model.getId()))
-            .collect(Collectors.toSet());
+            parametersTo,
+            mergingContext);
 
-        if (comparedParemeters.isEmpty()) {
-          comparedParemeters.addAll(candidateParameters);
-        } else {
-          comparedParemeters.retainAll(candidateParameters);
-        }
-
-        if (comparedParemeters.isEmpty()) {
-          allowableToSearchTheSame = false;
-        }
+        parametersTo = megedParameters.orElseGet(HashSet::new);
+        allowableToSearchTheSame = megedParameters.isPresent();
       }
+      comparisonConditions.put(modelId, Optional.empty());
     }
 
+    Set<String> sameModels = new HashSet<>();
     if (allowableToSearchTheSame) {
-      comparisonConditions.putAll(populateComparisonConditions(
-          comparisonConditions,
-          comparedParemeters));
-
-      dependencies = dependencies.stream()
-          .map(condition -> {
-            HashSet<String> tempConditions = new HashSet<>(condition.getConditions());
-            tempConditions.remove(mergingContext.getRootId());
-            Set<String> modelsTo = condition.getModelsTo().stream()
-                .filter(modelId -> comparedParemeters.contains(mergingContext.getModelParameter(modelId)))
-                .collect(Collectors.toSet());
-
-            return new ComparisonCondition(
-                condition.getModelFor(),
-                modelsTo,
-                tempConditions);
-          })
-          .collect(Collectors.toSet());
-    } else {
-      comparisonConditions.clear();
+      sameModels
+          .addAll(findSameModels(comparisonConditions, parametersTo, adapter, mergingContext));
+      currentDependencies.remove(mergingContext.getRootId());
     }
 
-    return mergingContext.populateDependencies(
-        comparisonConditions,
-        currentDependencies,
-        dependencies);
+    return mergeConditions(sameModels, currentDependencies, dependencies, adapter, mergingContext);
   }
 
   private ComparisonCondition currentCondition(
-      final String modelId,
-      final Set<ComparisonCondition> newDependencies) {
+      String modelId,
+      Set<ComparisonCondition> newDependencies) {
     List<ComparisonCondition> conditions = newDependencies.stream()
         .filter(comparisonCondition -> comparisonCondition.getModelFor().equals(modelId))
-        .collect(Collectors.toList());
+        .collect(Collectors.toCollection(ArrayList::new));
 
     if (conditions.size() > 1) {
       throw new IllegalStateException("Ambiguous conditions for one model.");
     }
 
-    Optional<ComparisonCondition> currentConditionOptional = conditions.stream().findFirst();
-
-    if (!currentConditionOptional.isPresent()) {
+    if (conditions.size() == 0) {
       throw new IllegalStateException("Condition is not present.");
     }
 
-    return currentConditionOptional.get();
+    return conditions.get(0);
   }
 
-  private Map<String, Set<String>> populateComparisonConditions(
-      Map<String, Set<String>> comparisonConditions,
-      Set<String> comparedParameters) {
-    Map<String, Set<String>> populatedComparisonConditions = new HashMap<>(comparisonConditions);
-    for (String modelId : populatedComparisonConditions.keySet()) {
-
-      if (populatedComparisonConditions.get(modelId).isEmpty()) {
-        populatedComparisonConditions.put(
-            modelId,
-            Collections.unmodifiableSet(new TreeSet<>(comparedParameters)));
-      }
-    }
-
-    return populatedComparisonConditions;
-  }
-
-  private Set<Model> buildModels(
+  private Set<String> findSameModels(
+      Map<String, Optional<String>> parametersMatching,
+      Set<String> allowedParameters,
       UniqueTypeNameAdapter adapter,
       MergingContext mergingContext) {
-    Map<String, Set<String>> parametersMatching = mergingContext.getParametersMatching();
-    Model rootModel = mergingContext.getRootModel();
-    ModelBuilder rootModelBuilder = new ModelBuilder(rootModel);
-    Set<Model> sameModels = new HashSet<>();
 
-    if (parametersMatching.isEmpty()) {
-      return new HashSet<>();
+    if (allowedParameters.isEmpty()) {
+      allowedParameters = new HashSet<>(Collections.singletonList(""));
     }
 
-    int parametersCount = parametersMatching.values().stream()
-        .map(Set::size)
-        .max(Integer::compareTo)
-        .orElse(0);
+    springfox.documentation.schema.Model rootModel = mergingContext.getRootModel();
+    springfox.documentation.builders.ModelBuilder rootModelBuilder =
+        new springfox.documentation.builders.ModelBuilder(rootModel);
+    Set<String> sameModels = new HashSet<>();
 
-    for (int paramIndex = 0; paramIndex < parametersCount; paramIndex++) {
-      List<ModelReference> subTypes = new ArrayList<>();
-      for (ModelReference modelReference : rootModel.getSubTypes()) {
+    String modelForTypeName = rootModel.getType().getErasedType().getName();
+    Set<springfox.documentation.schema.Model> modelsToCompare = mergingContext.getSimilarTypeModels(modelForTypeName);
+
+    for (String parameter : allowedParameters) {
+      List<springfox.documentation.schema.ModelReference> subTypes = new ArrayList<>();
+      for (springfox.documentation.schema.ModelReference modelReference : rootModel.getSubTypes()) {
         Optional<String> modelId = getModelId(modelReference);
 
-        if (modelId.isPresent()) {
-          modelReference = modelRefFunction(
-              paramIndex,
-              modelId.get(),
-              adapter,
-              mergingContext)
-              .apply(mergingContext.getModel(modelId.get()).getType());
+        if (modelId.isPresent() && mergingContext.containsModel(modelId.get())) {
+          String sModelId = modelId.get();
+          ModelContext modelContext =
+              Optional.ofNullable(parametersMatching.get(sModelId))
+                  .map(op -> op.orElse(parameter))
+                  .map(p -> pseudoContext(
+                      p,
+                      mergingContext.getModelContext(sModelId)))
+                  .orElseGet(() -> mergingContext.getModelContext(sModelId));
+          modelReference = modelRefFactory(
+              modelContext,
+              enumTypeDeterminer,
+              typeNameExtractor,
+              adapter.getNames()).apply(mergingContext.getModel(sModelId).getType());
         }
         subTypes.add(modelReference);
       }
 
-      Map<String, ModelProperty> newProperties = new HashMap<>(rootModel.getProperties());
+      Map<String, springfox.documentation.schema.ModelProperty> newProperties
+          = new HashMap<>(rootModel.getProperties());
       for (String propertyName : rootModel.getProperties().keySet()) {
-        ModelProperty property = rootModel.getProperties().get(propertyName);
-        ModelReference modelReference = property.getModelRef();
+        springfox.documentation.schema.ModelProperty property = rootModel.getProperties().get(propertyName);
+        springfox.documentation.schema.ModelReference modelReference = property.getModelRef();
         Optional<String> modelId = getModelId(modelReference);
 
-        if (modelId.isPresent()) {
+        if (modelId.isPresent() && mergingContext.containsModel(modelId.get())) {
+          String sModelId = modelId.get();
+          ModelContext modelContext =
+              Optional.ofNullable(parametersMatching.get(sModelId))
+                  .map(op -> op.orElse(parameter))
+                  .map(p -> pseudoContext(
+                      p,
+                      mergingContext.getModelContext(sModelId)))
+                  .orElseGet(() -> mergingContext.getModelContext(sModelId));
+
           newProperties.put(
               propertyName,
-              new ModelPropertyBuilder(property).build()
-                  .updateModelRef(modelRefFunction(
-                      paramIndex,
-                      modelId.get(),
-                      adapter,
-                      mergingContext)));
+              new springfox.documentation.builders.ModelPropertyBuilder(property).build().updateModelRef(
+                  modelRefFactory(
+                      modelContext,
+                      enumTypeDeterminer,
+                      typeNameExtractor,
+                      adapter.getNames())));
         }
       }
-      sameModels.add(rootModelBuilder.properties(newProperties).subTypes(subTypes).build());
+
+      springfox.documentation.schema.Model modelToCompare
+          = rootModelBuilder.properties(newProperties).subTypes(subTypes).build();
+
+      modelsToCompare.stream()
+          .filter(
+              m -> StringUtils.isEmpty(parameter)
+                  || parameter.equals(mergingContext.getModelParameter(m.getId())))
+          .filter(m -> m.equalsIgnoringName(modelToCompare))
+          .map(springfox.documentation.schema.Model::getId)
+          .findFirst()
+          .ifPresent(sameModels::add);
     }
 
     return sameModels;
   }
 
-  private Function<ResolvedType, ModelReference> modelRefFunction(
-      int paramIndex,
-      String modelId,
-      UniqueTypeNameAdapter adapter,
-      MergingContext mergingContext) {
-
-    Map<String, Set<String>> parametersMatching = mergingContext.getParametersMatching();
-    ModelContext context;
-    if (parametersMatching.containsKey(modelId)) {
-      List<String> parameters = parametersMatching.get(modelId).stream()
-          .sorted()
-          .collect(Collectors.toList());
-      String parameter = parameters.size() == 1 ? parameters.get(0) : parameters.get(paramIndex);
-      context = pseudoContext(
-          parameter,
-          mergingContext.getModelContext(modelId));
-    } else {
-      context = mergingContext.getModelContext(modelId);
-    }
-
-    return modelRefFactory(
-        context,
-        enumTypeDeterminer,
-        typeNameExtractor,
-        adapter.getNames());
-  }
-
-  private List<String> findBranchRoots(ModelContext rootContext) {
-    List<String> roots = new ArrayList<>();
-
-    ResolvedType resolvedType = rootContext.alternateFor(rootContext.getType());
-    if (resolvedType.isArray()) {
-      ResolvedType elementType = resolvedType.getArrayElementType();
-      roots.addAll(findBranchRoots(ModelContext.fromParent(
-          rootContext,
-          elementType)));
-    } else if (resolvedType.findSupertype(Map.class) != null || resolvedType.findSupertype(Collection.class) != null) {
-      for (ResolvedType parameter : resolvedType.getTypeParameters()) {
-        roots.addAll(findBranchRoots(ModelContext.fromParent(
-            rootContext,
-            parameter)));
-      }
-    } else {
-      roots.add(ModelContext.fromParent(
-          rootContext,
-          resolvedType).getTypeId());
-    }
-
-    return roots;
-  }
-
-  private Optional<String> findSameModels(
-      final Model modelFor,
-      final MergingContext mergingContext) {
-    String modelForTypeName = modelFor.getType().getErasedType().getName();
-    Set<Model> models = mergingContext.getSimilarTypeModels(modelForTypeName);
-    for (Model modelTo : models) {
-      if (modelFor.equalsIgnoringName(modelTo)) {
-        return Optional.of(modelTo.getId());
-      }
-    }
-
-    return Optional.empty();
-  }
-
   private Set<ComparisonCondition> mergeConditions(
-      Optional<ComparisonCondition> currentComparisonCondition,
+      Set<String> sameModels,
+      Set<String> currentDependencies,
+      Set<ComparisonCondition> dependencies,
       UniqueTypeNameAdapter adapter,
       MergingContext mergingContext) {
 
-    Set<ComparisonCondition> dependencies = new HashSet<>(mergingContext.getComparisonConditions());
-    if (currentComparisonCondition.isPresent()) {
-      ComparisonCondition currentCondition = currentComparisonCondition.get();
+    String parameterId = mergingContext.getParameterId();
+    if (!sameModels.isEmpty()) {
+      ComparisonCondition currentCondition = new ComparisonCondition(mergingContext.getRootId(),
+          sameModels, currentDependencies);
+
+      dependencies = filterDependencies(
+          dependencies,
+          modelsToParameters(sameModels, mergingContext),
+          mergingContext);
+
       dependencies.add(currentCondition);
 
       if (currentCondition.getConditions().isEmpty()) {
         for (ComparisonCondition depComparisonCondition : dependencies) {
+
+          Set<String> conditions = new HashSet<>(depComparisonCondition.getConditions());
+          conditions.remove(currentCondition.getModelFor());
           checkCondition(
-              depComparisonCondition,
+              new ComparisonCondition(depComparisonCondition.getModelFor(),
+                  depComparisonCondition.getModelsTo(), conditions),
               true);
           adapter.setEqualityFor(
-              depComparisonCondition.getModelFor(),
+              toTypeId(parameterId, depComparisonCondition.getModelFor()),
               new ArrayList<>(depComparisonCondition.getModelsTo()).get(0));
         }
+        return new HashSet<>(Collections.singletonList(currentCondition));
       } else {
         Set<ComparisonCondition> newDependencies = new HashSet<>();
         for (ComparisonCondition depComparisonCondition : dependencies) {
+
           Set<String> conditions = new HashSet<>(depComparisonCondition.getConditions());
+
           conditions.remove(currentCondition.getModelFor());
           conditions.addAll(currentCondition.getConditions());
-          newDependencies.add(new ComparisonCondition(depComparisonCondition.getModelFor(),
-                                                      depComparisonCondition.getModelsTo(),
-                                                      conditions));
+
+          newDependencies.add(
+              new ComparisonCondition(depComparisonCondition.getModelFor(),
+                  depComparisonCondition.getModelsTo(), conditions));
         }
         return newDependencies;
       }
     } else {
       adapter.registerUniqueType(
           mergingContext.getRootModel().getName(),
-          mergingContext.getRootId());
+          toTypeId(parameterId, mergingContext.getRootId()));
       for (ComparisonCondition depComparisonCondition : dependencies) {
         String modelId = depComparisonCondition.getModelFor();
         adapter.registerUniqueType(
             mergingContext.getModel(modelId).getName(),
-            modelId);
+            toTypeId(parameterId, modelId));
       }
     }
-    return currentComparisonCondition
-        .map(c -> new HashSet<>(Collections.singletonList(c)))
-        .orElse(new HashSet<>());
+
+    return new HashSet<>();
   }
 
-  private Model updateModel(
-      Model model,
+  private List<String> findBranchRoots(ModelContext rootContext) {
+    List<String> roots = new ArrayList<>();
+
+    ResolvedType resolvedType = rootContext.alternateEvaluatedType();
+    if (resolvedType.isArray()) {
+      ResolvedType elementType = resolvedType.getArrayElementType();
+      roots.addAll(findBranchRoots(ModelContext.fromParent(rootContext, elementType)));
+    } else {
+      for (ResolvedType parameter : resolvedType.getTypeParameters()) {
+        roots.addAll(findBranchRoots(ModelContext.fromParent(rootContext, parameter)));
+      }
+      roots.add(ModelContext.fromParent(rootContext, resolvedType).getModelId());
+    }
+    return roots;
+  }
+
+  private Set<String> collectNodes(
+      UniqueTypeNameAdapter adapter,
+      MergingContext mergingContext) {
+    springfox.documentation.schema.Model rootModel = mergingContext.getRootModel();
+    Set<String> nodes = new TreeSet<>();
+    for (springfox.documentation.schema.ModelReference modelReference : rootModel.getSubTypes()) {
+      Optional<String> modelId = getModelId(modelReference);
+
+      if (modelId.isPresent() && mergingContext.containsModel(modelId.get())) {
+        nodes.add(modelId.get());
+      }
+    }
+
+    ModelContext rootModelContext = mergingContext
+        .getModelContext(mergingContext.getRootId());
+    for (ResolvedType type : rootModel.getType().getTypeParameters()) {
+      String modelId = ModelContext
+          .fromParent(rootModelContext, rootModelContext.alternateFor(type))
+          .getModelId();
+      if (mergingContext.containsModel(modelId)) {
+        nodes.add(modelId);
+      }
+    }
+
+    for (springfox.documentation.schema.ModelProperty modelProperty : rootModel.getProperties().values()) {
+      Optional<String> modelId = getModelId(modelProperty.getModelRef());
+      if (modelId.isPresent() && mergingContext.containsModel(modelId.get())) {
+        nodes.add(modelId.get());
+      }
+    }
+
+    nodes.removeIf(
+        node -> adapter.getTypeName(toTypeId(rootModelContext.getParameterId(), node)).isPresent());
+
+    return nodes;
+  }
+
+  private Optional<Set<String>> mergeParameters(
+      String modelId,
+      Set<String> existingParameters,
+      MergingContext mergingContext) {
+
+    if (modelId.equals(mergingContext.getRootId())) {
+      return Optional.of(existingParameters);
+    }
+
+    Set<String> parameters = new HashSet<>(existingParameters);
+    for (Map.Entry<String, Set<String>> entry : mergingContext.getCircles().entrySet()) {
+      if (!entry.getValue().contains(modelId)) {
+
+        if (parameters.isEmpty()) {
+          parameters.addAll(mergingContext.getCircleParameters(entry.getKey()));
+        } else {
+          parameters.retainAll(mergingContext.getCircleParameters(entry.getKey()));
+        }
+
+        if (parameters.isEmpty()) {
+          return Optional.empty();
+        }
+      }
+    }
+
+    String modelForTypeName = mergingContext.getModel(modelId).getType().getErasedType().getName();
+    Set<springfox.documentation.schema.Model> similarTypeModels = mergingContext.getSimilarTypeModels(modelForTypeName);
+    Set<String> candidateParameters = similarTypeModels.stream()
+        .map(model -> mergingContext.getModelParameter(model.getId()))
+        .collect(Collectors.toCollection(HashSet::new));
+
+    if (parameters.isEmpty()) {
+      parameters.addAll(candidateParameters);
+    } else {
+      parameters.retainAll(candidateParameters);
+    }
+
+    if (parameters.isEmpty()) {
+      return Optional.empty();
+    }
+
+    return Optional.of(parameters);
+  }
+
+  private Set<ComparisonCondition> filterDependencies(
+      Set<ComparisonCondition> dependencies,
+      Set<String> parameters,
+      MergingContext mergingContext) {
+    return dependencies.stream().map(condition -> {
+      Set<String> modelsTo = condition.getModelsTo()
+          .stream()
+          .filter(modelId -> parameters.contains(mergingContext.getModelParameter(modelId)))
+          .collect(Collectors.toCollection(HashSet::new));
+      return new ComparisonCondition(condition.getModelFor(), modelsTo, condition.getConditions());
+    }).collect(Collectors.toCollection(HashSet::new));
+  }
+
+  private springfox.documentation.schema.Model updateModel(
+      springfox.documentation.schema.Model model,
       Map<String, ModelContext> contextMap,
       UniqueTypeNameAdapter adapter) {
     for (String propertyName : model.getProperties().keySet()) {
-      ModelProperty property = model.getProperties().get(propertyName);
+      springfox.documentation.schema.ModelProperty property = model.getProperties().get(propertyName);
       Optional<String> modelId = getModelId(property.getModelRef());
 
       if (modelId.isPresent() && contextMap.containsKey(modelId.get())) {
@@ -586,51 +548,52 @@ public class ApiModelReader {
                 adapter.getNames()));
       }
     }
-    List<ModelReference> subTypes = new ArrayList<>();
-    for (ModelReference oldModelRef : model.getSubTypes()) {
+    List<springfox.documentation.schema.ModelReference> subTypes = new ArrayList<>();
+    for (springfox.documentation.schema.ModelReference oldModelRef : model.getSubTypes()) {
       Optional<String> modelId = getModelId(oldModelRef);
 
       if (modelId.isPresent() && contextMap.containsKey(modelId.get())) {
         ModelContext modelContext = contextMap.get(modelId.get());
-        subTypes.add(modelRefFactory(
-            modelContext,
-            enumTypeDeterminer,
-            typeNameExtractor,
-            adapter.getNames())
-                         .apply(modelContext.getType()));
+        subTypes.add(
+            modelRefFactory(modelContext, enumTypeDeterminer, typeNameExtractor, adapter.getNames())
+                .apply(modelContext.getType()));
       } else {
         subTypes.add(oldModelRef);
       }
     }
-    String name = typeNameExtractor.typeName(
-        contextMap.get(model.getId()),
-        adapter.getNames());
+    ModelContext modelContxt = contextMap.get(model.getId());
+    String name = typeNameExtractor.typeName(modelContxt, adapter.getNames());
 
-    return new ModelBuilder(model).name(name).subTypes(subTypes).build();
+    return new springfox.documentation.builders.ModelBuilder(modelContxt.getTypeId()).name(name)
+        .qualifiedType(model.getQualifiedType())
+        .description(model.getDescription())
+        .baseModel(model.getBaseModel())
+        .discriminator(model.getDiscriminator())
+        .type(model.getType())
+        .example(model.getExample())
+        .xml(model.getXml())
+        .properties(model.getProperties())
+        .subTypes(subTypes)
+        .build();
   }
 
-  private Set<Model> updateModels(
-      final Collection<Model> models,
-      final Map<String, ModelContext> contextMap,
-      final UniqueTypeNameAdapter adapter) {
+  private Set<springfox.documentation.schema.Model> updateModels(
+      String parameterId,
+      Collection<springfox.documentation.schema.Model> models,
+      Map<String, ModelContext> contextMap,
+      UniqueTypeNameAdapter adapter) {
     models.forEach(model -> {
-      if (!adapter.getTypeName(model.getId()).isPresent()) {
-        adapter.registerUniqueType(
-            model.getName(),
-            model.getId());
+      String typeId = toTypeId(parameterId, model.getId());
+      if (!adapter.getTypeName(typeId).isPresent()) {
+        adapter.registerUniqueType(model.getName(), typeId);
       }
     });
 
-    return models.stream()
-        .map(model -> updateModel(
-            model,
-            contextMap,
-            adapter))
-        .collect(Collectors.toSet());
+    return models.stream().map(model -> updateModel(model, contextMap, adapter)).collect(
+        Collectors.toCollection(HashSet::new));
   }
 
-  @SuppressWarnings("rawtypes")
-  private ModelContext pseudoContext(
+  private static ModelContext pseudoContext(
       String parameterId,
       ModelContext context) {
     return ModelContext.inputParam(
@@ -642,10 +605,10 @@ public class ApiModelReader {
         context.getDocumentationType(),
         context.getAlternateTypeProvider(),
         context.getGenericNamingStrategy(),
-        new HashSet<>());
+        Collections.unmodifiableSet(new HashSet<>()));
   }
 
-  private void checkCondition(
+  private static void checkCondition(
       ComparisonCondition condition,
       boolean conditionalPresenceCheck) {
     if (conditionalPresenceCheck && !condition.getConditions().isEmpty()) {
@@ -656,8 +619,8 @@ public class ApiModelReader {
     }
   }
 
-  private Optional<String> getModelId(ModelReference ref) {
-    ModelReference refT = ref;
+  private static Optional<String> getModelId(springfox.documentation.schema.ModelReference ref) {
+    springfox.documentation.schema.ModelReference refT = ref;
     while (true) {
       if (refT.getModelId().isPresent()) {
         return refT.getModelId();
@@ -668,6 +631,19 @@ public class ApiModelReader {
         return Optional.empty();
       }
     }
+  }
+
+  private static String toTypeId(
+      String parameterId,
+      String modelId) {
+    return parameterId + "_" + modelId;
+  }
+
+  private static Set<String> modelsToParameters(
+      Set<String> models,
+      MergingContext mergingContext) {
+    return models.stream().map(mergingContext::getModelParameter).collect(
+        Collectors.toCollection(HashSet::new));
   }
 
   @SuppressWarnings("rawtypes")
@@ -681,39 +657,42 @@ public class ApiModelReader {
     }
   }
 
-  private static MergingContext populateTypes(Map<String, Set<Model>> modelMap) {
-    Map<String, Set<Model>> typedModelMap = new HashMap<>();
-    Map<String, Model> uniqueModels = new HashMap<>();
-    Map<String, String> parameterModelMap = new HashMap<>();
-
-    for (String parameterId : modelMap.keySet()) {
-      for (Model model : modelMap.get(parameterId)) {
-        uniqueModels.put(
-            model.getName(),
-            model);
-        parameterModelMap.put(
-            model.getId(),
-            parameterId);
-      }
+  private static MergingContext createChildMergingContext(
+      String modelId,
+      boolean isCircle,
+      Set<String> parameters,
+      Set<ComparisonCondition> dependencies,
+      MergingContext mergingContext) {
+    if (isCircle) {
+      return mergingContext.toRootId(modelId, dependencies, parameters);
+    } else {
+      return mergingContext.toRootId(modelId);
     }
+  }
 
-    for (Model model : uniqueModels.values()) {
+  private static MergingContext createMergingContext(
+      String parameterId,
+      Map<String, springfox.documentation.schema.Model> uniqueModels,
+      Map<String, String> parameterModelMap,
+      Map<String, springfox.documentation.schema.Model> currentBranch,
+      Map<String, ModelContext> contextMap) {
+    Map<String, Set<springfox.documentation.schema.Model>> typedModelMap = new HashMap<>();
+
+    for (springfox.documentation.schema.Model model : uniqueModels.values()) {
       String rawType = model.getType().getErasedType().getName();
 
-      Set<Model> tracked = new HashSet<>(Collections.singleton(model));
+      Set<springfox.documentation.schema.Model> models = new HashSet<>();
+      models.add(model);
+
       if (typedModelMap.containsKey(rawType)) {
-        tracked.addAll(typedModelMap.get(rawType));
+        models.addAll(typedModelMap.get(rawType));
       }
       typedModelMap.put(
           rawType,
-          tracked);
+          Collections.unmodifiableSet(models));
     }
 
-    return new MergingContext(
-        "",
-        typedModelMap,
-        parameterModelMap,
-        new HashMap<>(),
-        new HashMap<>());
+    return new MergingContext(parameterId, typedModelMap, parameterModelMap, currentBranch, contextMap);
   }
+
 }

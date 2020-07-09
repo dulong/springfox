@@ -29,7 +29,6 @@ import springfox.documentation.spring.web.dummy.models.Example
 import springfox.documentation.spring.web.dummy.models.ModelAttributeComplexTypeExample
 import springfox.documentation.spring.web.dummy.models.ModelAttributeExample
 import springfox.documentation.spring.web.dummy.models.SomeType
-import springfox.documentation.spring.web.mixins.ServicePluginsSupport
 import springfox.documentation.spring.web.plugins.DocumentationContextSpec
 
 import java.beans.BeanInfo
@@ -37,7 +36,6 @@ import java.beans.IntrospectionException
 
 import static springfox.documentation.schema.AlternateTypeRules.*
 
-@Mixin([ServicePluginsSupport])
 class ModelAttributeParameterExpanderSpec extends DocumentationContextSpec {
   TypeResolver typeResolver
   EnumTypeDeterminer enumTypeDeterminer
@@ -57,6 +55,7 @@ class ModelAttributeParameterExpanderSpec extends DocumentationContextSpec {
   def "should expand parameters"() {
     when:
     def parameters = sut.expand(new ExpansionContext("", typeResolver.resolve(Example), context()))
+        .collect { it -> it.legacy.get() }
 
     then:
     parameters.size() == 10
@@ -75,6 +74,7 @@ class ModelAttributeParameterExpanderSpec extends DocumentationContextSpec {
   def "should expand lists and nested types"() {
     when:
     def parameters = sut.expand(new ExpansionContext("", typeResolver.resolve(ModelAttributeExample), context()))
+        .collect { it -> it.legacy.get() }
 
     then:
     parameters.size() == 6
@@ -89,6 +89,7 @@ class ModelAttributeParameterExpanderSpec extends DocumentationContextSpec {
   def "should expand complex types"() {
     when:
     def parameters = sut.expand(new ExpansionContext("", typeResolver.resolve(ModelAttributeComplexTypeExample), context()))
+        .collect { it -> it.legacy.get() }
 
     then:
     parameters.size() == 12
@@ -109,6 +110,7 @@ class ModelAttributeParameterExpanderSpec extends DocumentationContextSpec {
   def "should expand parameters when parent name is not empty"() {
     when:
     def parameters = sut.expand(new ExpansionContext("parent", typeResolver.resolve(Example), context()))
+        .collect { it -> it.legacy.get() }
 
     then:
     parameters.size() == 10
@@ -126,6 +128,7 @@ class ModelAttributeParameterExpanderSpec extends DocumentationContextSpec {
   def "should not expand causing stack overflow"() {
     when:
     def parameters = sut.expand(new ExpansionContext("parent", typeResolver.resolve(SomeType), context()))
+        .collect { it -> it.legacy.get() }
 
     then:
     parameters.size() == 3
@@ -150,11 +153,11 @@ class ModelAttributeParameterExpanderSpec extends DocumentationContextSpec {
 
     when:
     def parameters = expander.expand(new ExpansionContext("", typeResolver.resolve(Example), context()))
+        .collect { it -> it.legacy.get() }
 
     then:
     parameters.size() == 0
   }
-
 
   def "should handle expansion of Book"() {
     given:
@@ -163,6 +166,7 @@ class ModelAttributeParameterExpanderSpec extends DocumentationContextSpec {
             "",
             typeResolver.resolve(Book),
             context()))
+        .collect { it.legacy.get() }
 
     expect:
     parameters.size() == 3
@@ -171,7 +175,6 @@ class ModelAttributeParameterExpanderSpec extends DocumentationContextSpec {
     parameters.find { it.name == 'authors[0].books[0].id' }
   }
 
-
   def "should handle expansion item with public fields"() {
     given:
     def parameters = sut.expand(
@@ -179,6 +182,7 @@ class ModelAttributeParameterExpanderSpec extends DocumentationContextSpec {
             "",
             typeResolver.resolve(Bug2423),
             context()))
+        .collect { it.legacy.get() }
 
     expect:
     parameters.size() == 2
@@ -240,6 +244,7 @@ class ModelAttributeParameterExpanderSpec extends DocumentationContextSpec {
             "",
             typeResolver.resolve(User),
             context()))
+        .collect { it -> it.legacy.get() }
 
     expect:
     parameters.size() == 2
@@ -272,7 +277,7 @@ class ModelAttributeParameterExpanderSpec extends DocumentationContextSpec {
   }
 
   class TreeEntity<T> {
-    T  parent
+    T parent
     User user
 
     User getUser() {

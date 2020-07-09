@@ -27,9 +27,11 @@ import javax.servlet.http.HttpServletRequest
 import static java.util.Collections.*
 import static springfox.documentation.spi.service.contexts.Orderings.*
 
-@Mixin([ApiListingSupport, AuthSupport])
 class Swagger2ControllerSpec extends DocumentationContextSpec
-    implements MapperSupport, JsonSupport {
+    implements MapperSupport,
+        JsonSupport,
+        AuthSupport,
+        ApiListingSupport {
 
   Swagger2ControllerWebMvc controller = new Swagger2ControllerWebMvc(
       mockEnvironment(),
@@ -105,8 +107,8 @@ class Swagger2ControllerSpec extends DocumentationContextSpec
     where:
     prefix        | expectedPath
     "/fooservice" | "/fooservice/servletPath"
-    "/"           | "/contextPath/servletPath"
-    ""            | "/contextPath/servletPath"
+    "/"           | "/servletPath"
+    ""            | "/servletPath"
   }
 
   def "Should omit port number if it is -1"() {

@@ -29,17 +29,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import springfox.documentation.builders.ResponseMessageBuilder;
+import springfox.documentation.builders.ExampleBuilder;
+import springfox.documentation.common.Compatibility;
 import springfox.documentation.schema.Example;
-import springfox.documentation.schema.ModelReference;
 import springfox.documentation.schema.TypeNameExtractor;
+import springfox.documentation.schema.property.ModelSpecificationFactory;
 import springfox.documentation.service.Header;
-import springfox.documentation.service.ResponseMessage;
+import springfox.documentation.service.Response;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.schema.EnumTypeDeterminer;
 import springfox.documentation.spi.schema.contexts.ModelContext;
 import springfox.documentation.spi.service.OperationBuilderPlugin;
 import springfox.documentation.spi.service.contexts.OperationContext;
+import springfox.documentation.spi.service.contexts.ResponseContext;
+import springfox.documentation.spring.web.plugins.DocumentationPluginsManager;
 import springfox.documentation.swagger.common.SwaggerPluginSupport;
 
 import java.util.ArrayList;
@@ -59,26 +62,35 @@ import static springfox.documentation.swagger.readers.operation.ResponseHeaders.
 
 @Component
 @Order(SwaggerPluginSupport.SWAGGER_PLUGIN_ORDER)
+@SuppressWarnings("deprecation")
 public class SwaggerResponseMessageReader implements OperationBuilderPlugin {
 
   private final EnumTypeDeterminer enumTypeDeterminer;
   private final TypeNameExtractor typeNameExtractor;
   private final TypeResolver typeResolver;
+  private final ModelSpecificationFactory modelSpecifications;
+  private final DocumentationPluginsManager documentationPlugins;
 
   @Autowired
   public SwaggerResponseMessageReader(
       EnumTypeDeterminer enumTypeDeterminer,
       TypeNameExtractor typeNameExtractor,
-      TypeResolver typeResolver) {
+      TypeResolver typeResolver,
+      ModelSpecificationFactory modelSpecifications,
+      DocumentationPluginsManager documentationPlugins) {
     this.enumTypeDeterminer = enumTypeDeterminer;
     this.typeNameExtractor = typeNameExtractor;
     this.typeResolver = typeResolver;
+    this.modelSpecifications = modelSpecifications;
+    this.documentationPlugins = documentationPlugins;
   }
 
   @Override
   public void apply(OperationContext context) {
-    context.operationBuilder().responseMessages(read(context));
-
+    Compatibility<Set<springfox.documentation.service.ResponseMessage>,
+        Set<springfox.documentation.service.Response>> read = read(context);
+    context.operationBuilder().responseMessages(read.getLegacy().orElse(new HashSet<>()));
+    context.operationBuilder().responses(read.getModern().orElse(new HashSet<>()));
   }
 
   @Override
@@ -87,12 +99,13 @@ public class SwaggerResponseMessageReader implements OperationBuilderPlugin {
   }
 
 
-  @SuppressWarnings({ "CyclomaticComplexity", "NPathComplexity" })
-  protected Set<ResponseMessage> read(OperationContext context) {
+  @SuppressWarnings({"CyclomaticComplexity", "NPathComplexity"})
+  protected Compatibility<Set<springfox.documentation.service.ResponseMessage>,
+      Set<Response>> read(OperationContext context) {
     ResolvedType defaultResponse = context.getReturnType();
     Optional<ApiOperation> operationAnnotation = context.findAnnotation(ApiOperation.class);
     Optional<ResolvedType> operationResponse =
-        operationAnnotation.map(resolvedTypeFromOperation(
+        operationAnnotation.map(resolvedTypeFromApiOperation(
             typeResolver,
             defaultResponse));
     Optional<ResponseHeader[]> defaultResponseHeaders = operationAnnotation.map(ApiOperation::responseHeaders);
@@ -101,17 +114,21 @@ public class SwaggerResponseMessageReader implements OperationBuilderPlugin {
 
 
     List<ApiResponses> allApiResponses = context.findAllAnnotations(ApiResponses.class);
-    Set<ResponseMessage> responseMessages = new HashSet<>();
+    Set<springfox.documentation.service.ResponseMessage> responseMessages = new HashSet<>();
+    Set<Response> responses = new HashSet<>();
 
     Map<Integer, ApiResponse> seenResponsesByCode = new HashMap<>();
     for (ApiResponses apiResponses : allApiResponses) {
       ApiResponse[] apiResponseAnnotations = apiResponses.value();
       for (ApiResponse apiResponse : apiResponseAnnotations) {
         if (!seenResponsesByCode.containsKey(apiResponse.code())) {
+          ResponseContext responseContext = new ResponseContext(
+              context.getDocumentationContext(),
+              context);
           seenResponsesByCode.put(
               apiResponse.code(),
               apiResponse);
-          Optional<ModelReference> responseModel = empty();
+          Optional<springfox.documentation.schema.ModelReference> responseModel = empty();
           ModelContext modelContext = context.operationModelsBuilder()
               .addReturn(
                   typeResolver.resolve(apiResponse.response()),
@@ -121,8 +138,7 @@ public class SwaggerResponseMessageReader implements OperationBuilderPlugin {
             type = type.map(Optional::of).orElse(operationResponse);
           }
           if (type.isPresent()) {
-
-            final Map<String, String> knownNames = new HashMap<>();
+            Map<String, String> knownNames = new HashMap<>();
             Optional.ofNullable(context.getKnownModels().get(modelContext.getParameterId()))
                 .orElse(new HashSet<>())
                 .forEach(model -> knownNames.put(
@@ -141,22 +157,33 @@ public class SwaggerResponseMessageReader implements OperationBuilderPlugin {
           for (ExampleProperty exampleProperty : apiResponse.examples().value()) {
             if (!isEmpty(exampleProperty.value())) {
               final String mediaType = isEmpty(exampleProperty.mediaType()) ? null : exampleProperty.mediaType();
-              examples.add(new Example(
-                  mediaType,
-                  exampleProperty.value()));
+              examples.add(new ExampleBuilder().mediaType(mediaType).value(exampleProperty.value()).build());
             }
           }
           Map<String, Header> headers = new HashMap<>(defaultHeaders);
           headers.putAll(headers(apiResponse.responseHeaders()));
 
-          responseMessages.add(new ResponseMessageBuilder()
-                                   .code(apiResponse.code())
-                                   .message(apiResponse.message())
-                                   .responseModel(responseModel.orElse(null))
-                                   .examples(examples)
-                                   .headersWithDescription(headers)
-                                   .build());
+          responseMessages.add(new springfox.documentation.builders.ResponseMessageBuilder()
+              .code(apiResponse.code())
+              .message(apiResponse.message())
+              .responseModel(responseModel.orElse(null))
+              .examples(examples)
+              .headersWithDescription(headers)
+              .build());
 
+          Optional<ResolvedType> finalType = type;
+          context.produces()
+              .forEach(mediaType ->
+                  finalType.map(t -> modelSpecifications.create(modelContext, t))
+                      .ifPresent(model -> responseContext.responseBuilder()
+                          .representation(mediaType)
+                          .apply(r -> r.model(m -> m.copyOf(model)))));
+          responseContext.responseBuilder()
+              .examples(examples)
+              .description(apiResponse.message())
+              .headers(headers.values())
+              .code(String.valueOf(apiResponse.code()));
+          responses.add(documentationPlugins.response(responseContext));
         }
       }
     }
@@ -173,20 +200,38 @@ public class SwaggerResponseMessageReader implements OperationBuilderPlugin {
               model.getId(),
               model.getName()));
 
-      ModelReference responseModel = modelRefFactory(
+      springfox.documentation.schema.ModelReference responseModel = modelRefFactory(
           modelContext,
           enumTypeDeterminer,
           typeNameExtractor,
           knownNames)
           .apply(resolvedType);
       context.operationBuilder().responseModel(responseModel);
-      ResponseMessage defaultMessage = new ResponseMessageBuilder().code(httpStatusCode(context))
-          .message(message(context)).responseModel(responseModel).build();
+      springfox.documentation.service.ResponseMessage defaultMessage =
+          new springfox.documentation.builders.ResponseMessageBuilder()
+          .code(httpStatusCode(context))
+          .message(message(context))
+          .responseModel(responseModel)
+          .build();
       if (!responseMessages.contains(defaultMessage) && !"void".equals(responseModel.getType())) {
         responseMessages.add(defaultMessage);
       }
+      ResponseContext responseContext = new ResponseContext(
+          context.getDocumentationContext(),
+          context);
+      context.consumes()
+          .forEach(mediaType ->
+              responseContext.responseBuilder()
+                  .representation(mediaType)
+                  .apply(r -> r.model(m ->
+                      m.copyOf(modelSpecifications.create(modelContext, resolvedType)))));
+
+      responseContext.responseBuilder()
+          .description(message(context))
+          .code(String.valueOf(httpStatusCode(context)));
+      responses.add(documentationPlugins.response(responseContext));
     }
-    return responseMessages;
+    return new Compatibility<>(responseMessages, responses);
   }
 
   static boolean isSuccessful(int code) {

@@ -63,7 +63,7 @@ public class AbstractDocumentationPluginsBootstrapper {
       Defaults defaults,
       TypeResolver typeResolver,
       PathProvider pathProvider) {
-    
+
     this.documentationPluginsManager = documentationPluginsManager;
     this.handlerProviders = handlerProviders;
     this.scanned = scanned;
@@ -72,17 +72,17 @@ public class AbstractDocumentationPluginsBootstrapper {
   }
 
   protected void bootstrapDocumentationPlugins() {
-    List<DocumentationPlugin> plugins = StreamSupport.stream(documentationPluginsManager.documentationPlugins()
-        .spliterator(), false)
+    List<DocumentationPlugin> plugins = documentationPluginsManager.documentationPlugins()
+        .stream()
         .sorted(pluginOrdering())
         .collect(toList());
-    LOGGER.info("Found {} custom documentation plugin(s)", plugins.size());
+    LOGGER.debug("Found {} custom documentation plugin(s)", plugins.size());
     for (DocumentationPlugin each : plugins) {
       DocumentationType documentationType = each.getDocumentationType();
       if (each.isEnabled()) {
         scanDocumentation(buildContext(each));
       } else {
-        LOGGER.info("Skipping initializing disabled plugin bean {} v{}",
+        LOGGER.debug("Skipping initializing disabled plugin bean {} v{}",
             documentationType.getName(), documentationType.getVersion());
       }
     }
@@ -110,8 +110,7 @@ public class AbstractDocumentationPluginsBootstrapper {
         .map(AlternateTypeRuleConvention::rules)
         .flatMap((rule) -> StreamSupport.stream(rule.spliterator(), false))
         .collect(toList());
-    return documentationPluginsManager
-        .createContextBuilder(documentationType, defaultConfiguration)
+    return documentationPluginsManager.createContextBuilder(documentationType, defaultConfiguration)
         .rules(rules)
         .requestHandlers(combiner().combine(requestHandlers));
   }
@@ -120,7 +119,7 @@ public class AbstractDocumentationPluginsBootstrapper {
     return ofNullable(combiner).orElse(new DefaultRequestHandlerCombiner());
   }
 
-  private Function<RequestHandlerProvider, ? extends Iterable<RequestHandler>> handlers() {
+  private Function<RequestHandlerProvider, Iterable<RequestHandler>> handlers() {
     return (Function<RequestHandlerProvider, Iterable<RequestHandler>>) RequestHandlerProvider::requestHandlers;
   }
 

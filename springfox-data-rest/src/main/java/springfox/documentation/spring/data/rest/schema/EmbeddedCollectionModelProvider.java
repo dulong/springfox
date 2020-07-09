@@ -20,13 +20,17 @@ package springfox.documentation.spring.data.rest.schema;
 
 import com.fasterxml.classmate.ResolvedType;
 import com.fasterxml.classmate.TypeResolver;
-import org.springframework.hateoas.RelProvider;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.server.LinkRelationProvider;
 import springfox.documentation.builders.ModelPropertyBuilder;
-import springfox.documentation.schema.Model;
-import springfox.documentation.schema.ModelProperty;
+import springfox.documentation.builders.ModelSpecificationBuilder;
+import springfox.documentation.builders.PropertySpecificationBuilder;
+import springfox.documentation.schema.CollectionType;
+import springfox.documentation.schema.ModelSpecification;
+import springfox.documentation.schema.PropertySpecification;
 import springfox.documentation.schema.TypeNameExtractor;
 import springfox.documentation.schema.Xml;
+import springfox.documentation.schema.property.ModelSpecificationFactory;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spi.schema.EnumTypeDeterminer;
 import springfox.documentation.spi.schema.SyntheticModelProviderPlugin;
@@ -43,23 +47,27 @@ import static springfox.documentation.schema.ResolvedTypes.*;
 class EmbeddedCollectionModelProvider implements SyntheticModelProviderPlugin {
 
   private final TypeResolver resolver;
-  private final RelProvider relProvider;
+  private final LinkRelationProvider relProvider;
   private final TypeNameExtractor typeNameExtractor;
   private final EnumTypeDeterminer enumTypeDeterminer;
+  private final ModelSpecificationFactory modelSpecifications;
 
   EmbeddedCollectionModelProvider(
       TypeResolver resolver,
-      RelProvider relProvider,
+      LinkRelationProvider relProvider,
       TypeNameExtractor typeNameExtractor,
-      EnumTypeDeterminer enumTypeDeterminer) {
+      EnumTypeDeterminer enumTypeDeterminer,
+      ModelSpecificationFactory modelSpecifications) {
     this.resolver = resolver;
     this.relProvider = relProvider;
     this.typeNameExtractor = typeNameExtractor;
     this.enumTypeDeterminer = enumTypeDeterminer;
+    this.modelSpecifications = modelSpecifications;
   }
 
+  @SuppressWarnings("deprecation")
   @Override
-  public Model create(ModelContext context) {
+  public springfox.documentation.schema.Model create(ModelContext context) {
     ResolvedType resourceType = resolver.resolve(context.getType());
     List<ResolvedType> typeParameters = resourceType.getTypeParameters();
     Class<?> type = typeParameters.get(0).getErasedType();
@@ -71,7 +79,8 @@ class EmbeddedCollectionModelProvider implements SyntheticModelProviderPlugin {
         .name(name)
         .qualifiedType(type.getName())
         .type(typeParameters.get(0))
-        .properties(properties(context).stream().collect(toMap(ModelProperty::getName, identity())))
+        .properties(properties(context).stream()
+            .collect(toMap(springfox.documentation.schema.ModelProperty::getName, identity())))
         .xml(new Xml()
             .wrapped(true)
             .name("content")
@@ -80,21 +89,68 @@ class EmbeddedCollectionModelProvider implements SyntheticModelProviderPlugin {
   }
 
   @Override
-  public List<ModelProperty> properties(ModelContext context) {
+  @SuppressWarnings("deprecation")
+  public List<springfox.documentation.schema.ModelProperty> properties(ModelContext context) {
     ResolvedType resourceType = resolver.resolve(context.getType());
     List<ResolvedType> typeParameters = resourceType.getTypeParameters();
     Class<?> type = typeParameters.get(0).getErasedType();
     return singletonList(
         new ModelPropertyBuilder()
-            .name(relProvider.getCollectionResourceRelFor(type))
+            .name(relProvider.getCollectionResourceRelFor(type).value())
             .type(resolver.resolve(List.class, type))
-            .qualifiedType(Resources.class.getName())
+            .qualifiedType(CollectionModel.class.getName())
             .position(0)
             .required(true)
             .isHidden(false)
             .description("Resource collection")
             .build()
             .updateModelRef(modelRefFactory(context, enumTypeDeterminer, typeNameExtractor)));
+  }
+
+  @Override
+  public ModelSpecification createModelSpecification(ModelContext context) {
+    ResolvedType resourceType = resolver.resolve(context.getType());
+    List<ResolvedType> typeParameters = resourceType.getTypeParameters();
+    Class<?> type = typeParameters.get(0).getErasedType();
+    String name = typeNameExtractor.typeName(context);
+    return context.getModelSpecificationBuilder()
+        .name(name)
+        .facets(f -> f.description(String.format(
+            "Embedded collection of %s",
+            type.getSimpleName()))
+            .xml(new Xml()
+                .wrapped(true)
+                .name("content")))
+        .compoundModel(cm ->
+            cm.properties(propertySpecifications(context))
+                .modelKey(m ->
+                    m.isResponse(context.isReturnType())
+                        .qualifiedModelName(q ->
+                            q.namespace("springfox.documentation.spring.data.rest.schema")
+                                .name(name))
+                        .build()))
+        .build();
+  }
+
+  @Override
+  public List<PropertySpecification> propertySpecifications(ModelContext context) {
+    ResolvedType resourceType = resolver.resolve(context.getType());
+    List<ResolvedType> typeParameters = resourceType.getTypeParameters();
+    Class<?> type = typeParameters.get(0).getErasedType();
+    ModelSpecification modelSpecification = new ModelSpecificationBuilder()
+        .collectionModel(c ->
+            c.model(m -> m.copyOf(modelSpecifications.create(context,
+                typeParameters.get(0))))
+                .collectionType(CollectionType.LIST))
+        .build();
+    return singletonList(
+        new PropertySpecificationBuilder(relProvider.getCollectionResourceRelFor(type).value())
+            .type(modelSpecification)
+            .position(0)
+            .required(true)
+            .isHidden(false)
+            .description("Resource collection")
+            .build());
   }
 
   @Override
@@ -109,7 +165,9 @@ class EmbeddedCollectionModelProvider implements SyntheticModelProviderPlugin {
   @Override
   public boolean supports(ModelContext delimiter) {
     return EmbeddedCollection.class.equals(resolver.resolve(delimiter.getType()).getErasedType())
-        && delimiter.getDocumentationType() == DocumentationType.SWAGGER_2;
+        && (delimiter.getDocumentationType() == DocumentationType.SWAGGER_2
+        || delimiter.getDocumentationType() == DocumentationType.OAS_30
+        || delimiter.getDocumentationType() == DocumentationType.SPRING_WEB);
   }
 
 }

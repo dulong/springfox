@@ -34,10 +34,17 @@ import static springfox.bean.validators.plugins.Validators.*;
 @Component
 @Order(Validators.BEAN_VALIDATOR_PLUGIN_ORDER)
 public class PatternAnnotationPlugin implements ModelPropertyBuilderPlugin {
+
   @Override
+  @SuppressWarnings("deprecation")
   public void apply(ModelPropertyContext context) {
     Optional<Pattern> pattern = extractAnnotation(context, Pattern.class);
-    context.getBuilder().pattern(createPatternValueFromAnnotation(pattern));
+    String patternValueFromAnnotation = createPatternValueFromAnnotation(pattern);
+    context.getBuilder().pattern(patternValueFromAnnotation);
+    if (patternValueFromAnnotation != null) {
+      context.getSpecificationBuilder()
+             .stringFacet(s -> s.pattern(patternValueFromAnnotation));
+    }
   }
 
   @Override

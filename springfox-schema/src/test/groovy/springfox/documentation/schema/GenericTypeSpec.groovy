@@ -19,14 +19,12 @@
 package springfox.documentation.schema
 
 import spock.lang.Unroll
-import springfox.documentation.schema.mixins.TypesForTestingSupport
 
 import static java.util.Collections.*
 import static org.springframework.util.StringUtils.*
 import static springfox.documentation.schema.Collections.*
 import static springfox.documentation.spi.schema.contexts.ModelContext.*
 
-@Mixin([TypesForTestingSupport, AlternateTypesSupport])
 class GenericTypeSpec extends SchemaSpecification {
   def namingStrategy = new DefaultGenericTypeNamingStrategy()
 
@@ -52,7 +50,7 @@ class GenericTypeSpec extends SchemaSpecification {
         alternateTypeProvider(),
         namingStrategy,
         emptySet())
-    def propertyLookup = ["GenericType": "genericField", "Resource": "links"]
+    def propertyLookup = ["GenericType": "genericField", "EntityModel": "links"]
 
     when:
     Model asInput = modelProvider.modelFor(inputContext).get()
@@ -78,7 +76,7 @@ class GenericTypeSpec extends SchemaSpecification {
     genericCollectionWithEnum()     | "List"                                        | "List«string»"                                | "java.util.Collection<springfox.documentation.schema.ExampleEnum>"
     genericTypeWithPrimitiveArray() | "Array"                                       | "Array«byte»"                                 | "byte"
     genericTypeWithComplexArray()   | "Array"                                       | "Array«SimpleType»"                           | null
-    genericResource()               | "List"                                        | "SubclassOfResourceSupport"                   | null
+    genericEntityModel()            | "List"                                        | "SubclassOfRepresentationModel"               | null
   }
 
   @Unroll

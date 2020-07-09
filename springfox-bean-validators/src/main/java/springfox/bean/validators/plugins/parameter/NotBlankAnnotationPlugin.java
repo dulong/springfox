@@ -45,6 +45,7 @@ public class NotBlankAnnotationPlugin implements ParameterBuilderPlugin {
     return true;
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public void apply(ParameterContext context) {
     Optional<NotBlank> notBlank = annotationFromParameter(context, NotBlank.class);
@@ -52,6 +53,7 @@ public class NotBlankAnnotationPlugin implements ParameterBuilderPlugin {
     if (notBlank.isPresent()) {
       LOG.debug("@NotBlank present: setting parameter as required and not allowing empty values");
       context.parameterBuilder().required(true);
+      context.requestParameterBuilder().required(true);
     }
   }
 }

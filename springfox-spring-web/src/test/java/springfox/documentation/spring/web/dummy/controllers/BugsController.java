@@ -33,7 +33,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.Authorization;
 import io.swagger.annotations.AuthorizationScope;
-import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -88,7 +88,10 @@ public class BugsController {
   }
 
   @ApiImplicitParams(
-      @ApiImplicitParam(dataType = "string", allowMultiple = true, paramType = "header")
+      @ApiImplicitParam(name = "custom-header",
+                        dataTypeClass = String.class,
+                        allowMultiple = true,
+                        paramType = "header")
   )
   @RequestMapping(value = "1209", method = POST)
   public ResponseEntity<String> bug1209() {
@@ -125,8 +128,8 @@ public class BugsController {
   }
 
   @RequestMapping(value = "1440", method = GET)
-  public Resource<String> issue1440() {
-    return new Resource<String>("1420");
+  public EntityModel<String> issue1440() {
+    return EntityModel.of("1420");
   }
 
   @RequestMapping(value = "1475", method = GET)
@@ -261,6 +264,7 @@ public class BugsController {
   public void method1() {
   }
 
+  @SuppressWarnings("deprecation")
   @GetMapping(value = "/1841", produces = APPLICATION_JSON_UTF8_VALUE)
   public void method2() {
   }
@@ -331,6 +335,7 @@ public class BugsController {
 
   }
 
+  @SuppressWarnings("deprecation")
   @PostMapping(value = "/1887/{env}/{list-id}/emails",
       produces = APPLICATION_JSON_UTF8_VALUE,
       consumes = APPLICATION_JSON_UTF8_VALUE)
@@ -417,6 +422,7 @@ public class BugsController {
     return null;
   }
 
+  @SuppressWarnings("deprecation")
   @RequestMapping(value = "/bug2203", method = RequestMethod.GET,
       produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
   public ResponseEntity<Response<LanguageResponse>> bug2203() {

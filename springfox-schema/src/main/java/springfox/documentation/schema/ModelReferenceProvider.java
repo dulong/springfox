@@ -24,7 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.spi.schema.EnumTypeDeterminer;
 import springfox.documentation.spi.schema.contexts.ModelContext;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -33,9 +33,9 @@ import static java.util.Optional.*;
 import static springfox.documentation.schema.Collections.*;
 import static springfox.documentation.schema.Maps.*;
 import static springfox.documentation.schema.ResolvedTypes.*;
-import static springfox.documentation.schema.Types.*;
 import static springfox.documentation.spi.schema.contexts.ModelContext.*;
 
+@Deprecated
 class ModelReferenceProvider implements Function<ResolvedType, ModelReference> {
   private final TypeNameExtractor typeNameExtractor;
   private final EnumTypeDeterminer enumTypeDeterminer;
@@ -50,7 +50,7 @@ class ModelReferenceProvider implements Function<ResolvedType, ModelReference> {
     this.typeNameExtractor = typeNameExtractor;
     this.enumTypeDeterminer = enumTypeDeterminer;
     this.parentContext = parentContext;
-    this.knownNames = new HashMap<>(knownNames);
+    this.knownNames = Collections.unmodifiableMap(knownNames);
   }
 
   @Override
@@ -115,10 +115,12 @@ class ModelReferenceProvider implements Function<ResolvedType, ModelReference> {
 
   private String modelId(ModelContext context) {
     ResolvedType type = context.getType();
-    if (type instanceof ResolvedPrimitiveType || isBaseType(type) || isVoid(type)
+    if (type instanceof ResolvedPrimitiveType
+        || springfox.documentation.schema.Types.isBaseType(type)
+        || isVoid(type)
         || enumTypeDeterminer.isEnum(type.getErasedType())) {
       return null;
     }
-    return context.getTypeId();
+    return context.getModelId();
   }
 }

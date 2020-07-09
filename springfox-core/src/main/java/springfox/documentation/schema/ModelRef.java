@@ -24,6 +24,11 @@ import springfox.documentation.service.AllowableValues;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Not required when using {@link ModelSpecification} instead
+ * @deprecated @since 3.0.0
+ */
+@Deprecated
 public class ModelRef implements ModelReference {
   private final String type;
   private final Optional<String> typeSignature;
@@ -183,6 +188,8 @@ public class ModelRef implements ModelReference {
         && Objects.equals(
         allowableValues,
         that.allowableValues)
-        && modelId.isPresent() == that.modelId.isPresent();
+        && Objects.equals(
+        modelId,
+        that.modelId);
   }
 }

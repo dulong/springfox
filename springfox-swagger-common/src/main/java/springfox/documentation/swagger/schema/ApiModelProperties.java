@@ -47,6 +47,7 @@ import static org.springframework.util.StringUtils.*;
 
 public final class ApiModelProperties {
   private static final Logger LOGGER = LoggerFactory.getLogger(ApiModelProperties.class);
+  @SuppressWarnings("java:S4784")
   private static final Pattern RANGE_PATTERN = Pattern.compile("range([\\[(])(.*),(.*)([])])$");
 
   private ApiModelProperties() {
@@ -117,6 +118,7 @@ public final class ApiModelProperties {
     return annotation.map(Optional::of).orElse(ofNullable(AnnotationUtils.getAnnotation(annotated,
         ApiModelProperty.class)));
   }
+
 
   static Function<ApiModelProperty, String> toExample() {
     return annotation -> {
